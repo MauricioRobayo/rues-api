@@ -64,7 +64,7 @@ interface Error {
   message: string;
 }
 
-export async function getEstablisments({
+export async function getEstablishments({
   NIT,
   token,
 }: {
