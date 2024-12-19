@@ -76,7 +76,7 @@ export async function getEstablisments({
     const data: { chamber: string; name: string; registry: string }[] =
       JSON.parse(await readFile(dataFile, "utf-8"));
     console.log(
-      `Found data file for "${NIT}". Returning data from disk with ${data.length} establishments.`,
+      `Found data file for "${NIT}". Returning data from disk with ${data.length} establishments.`
     );
     return data;
   } catch {
@@ -95,15 +95,15 @@ export async function getEstablisments({
       console.error(
         "Cound not find business registration id for",
         NIT,
-        JSON.stringify(rues),
+        JSON.stringify(rues)
       );
       return [];
     }
     const { businessRegistrationNumber, chamberCode } = getBusinessDetails(
-      businessRegistrationId,
+      businessRegistrationId
     );
     console.log(
-      `Getting business establishments for ${chamberCode} - ${businessRegistrationNumber}...`,
+      `Getting business establishments for ${chamberCode} - ${businessRegistrationNumber}...`
     );
     const response = await getBusinessEstablishments({
       apiToken,
@@ -144,7 +144,7 @@ async function advancedSearch({
         "content-type": "application/json",
       },
       method: "POST",
-    },
+    }
   );
   const data: AdvancedSearchResponse = await response.json();
   return data;
@@ -182,7 +182,7 @@ async function getBusinessEstablishments({
         "content-type": "application/json",
       },
       method: "POST",
-    },
+    }
   );
   const data: BusinessEstablishmentsResponse = await response.json();
   return data;
@@ -197,7 +197,7 @@ async function getToken() {
     throw new Error("Could not get token");
   }
   console.log(
-    `Successfuly got a new token: "${token.slice(0, 4)}${"*".repeat(10)}"`,
+    `Successfully got a new token: "${token.slice(0, 4)}${"*".repeat(10)}"`
   );
   return token;
 }
