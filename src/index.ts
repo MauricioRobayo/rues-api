@@ -146,7 +146,7 @@ async function advancedSearch({
       method: "POST",
     }
   );
-  const data: AdvancedSearchResponse = await response.json();
+  const data = (await response.json()) as AdvancedSearchResponse;
   return data;
 }
 
@@ -184,7 +184,7 @@ async function getBusinessEstablishments({
       method: "POST",
     }
   );
-  const data: BusinessEstablishmentsResponse = await response.json();
+  const data = (await response.json()) as BusinessEstablishmentsResponse;
   return data;
 }
 
