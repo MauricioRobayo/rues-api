@@ -11,6 +11,8 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
+    "lint": "eslint --fix",
+    "format": "prettier --write src",
     "test": "vitest run",
     "test:watch": "vitest"
   },
