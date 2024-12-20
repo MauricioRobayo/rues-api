@@ -9,12 +9,8 @@ if (tokenResponse.status === "error") {
 
 const rues = new RUES(tokenResponse.data.token);
 
-try {
-  const response = await rues.getBusinessEstablishments({
-    businessRegistrationNumber: "0001763070",
-    chamberCode: "04",
-  });
-  console.dir(response, { depth: Infinity });
-} catch (err) {
-  console.error(err);
-}
+const response = await rues.getBusinessEstablishments({
+  businessRegistrationNumber: "0001763070",
+  chamberCode: "04",
+});
+console.dir(response, { depth: Infinity });

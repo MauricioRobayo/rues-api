@@ -128,36 +128,43 @@ export class RUES {
   }
 
   static async getToken(): Promise<
-    | { data: unknown; status: "error"; statusCode: number }
+    | { data: unknown; status: "error"; statusCode?: number }
     | { data: { token: string }; status: "success"; statusCode: number }
   > {
-    const response = await fetch(
-      `${RUES.baseUrl}/WEB2/api/Token/ObtenerToken`,
-      {
-        method: "POST",
+    try {
+      const response = await fetch(
+        `${RUES.baseUrl}/WEB2/api/Token/ObtenerToken`,
+        {
+          method: "POST",
+        }
+      );
+      const token = response.headers.get("tokenRuesAPI");
+      const data = await response.json();
+      if (!token) {
+        return {
+          data,
+          status: "error",
+          statusCode: response.status,
+        };
       }
-    );
-    const token = response.headers.get("tokenRuesAPI");
-    const data = await response.json();
-    if (!token) {
       return {
-        data,
-        status: "error",
+        data: { token },
+        status: "success",
         statusCode: response.status,
       };
+    } catch (error) {
+      return {
+        data: error,
+        status: "error",
+      };
     }
-    return {
-      data: { token },
-      status: "success",
-      statusCode: response.status,
-    };
   }
 
   async advancedSearch(
     query: { matricula: string } | { nit: number } | { razon: string }
   ): Promise<
     | { data: AdvancedSearchResponse; status: "success"; statusCode: number }
-    | { data: unknown; status: "error"; statusCode: number }
+    | { data: unknown; status: "error"; statusCode?: number }
   > {
     if (!this.token) {
       return {
@@ -170,34 +177,41 @@ export class RUES {
       };
     }
 
-    const headers = new Headers();
-    headers.append("Content-Type", "application/json");
-    headers.append("Authorization", `Bearer ${this.token}`);
+    try {
+      const headers = new Headers();
+      headers.append("Content-Type", "application/json");
+      headers.append("Authorization", `Bearer ${this.token}`);
 
-    const requestOptions = {
-      body: JSON.stringify(query),
-      headers: headers,
-      method: "POST",
-    };
-    const response = await fetch(
-      `${RUES.baseUrl}/api/ConsultasRUES/BusquedaAvanzadaRM`,
-      requestOptions
-    );
+      const requestOptions = {
+        body: JSON.stringify(query),
+        headers: headers,
+        method: "POST",
+      };
+      const response = await fetch(
+        `${RUES.baseUrl}/api/ConsultasRUES/BusquedaAvanzadaRM`,
+        requestOptions
+      );
 
-    const data = await response.json();
-    if (!response.ok) {
+      const data = await response.json();
+      if (!response.ok) {
+        return {
+          data,
+          status: "error",
+          statusCode: response.status,
+        };
+      }
+
       return {
-        data,
-        status: "error",
+        data: data as AdvancedSearchResponse,
+        status: "success",
         statusCode: response.status,
       };
+    } catch (error) {
+      return {
+        data: error,
+        status: "error",
+      };
     }
-
-    return {
-      data: data as AdvancedSearchResponse,
-      status: "success",
-      statusCode: response.status,
-    };
   }
 
   async getBusinessEstablishments(options: {
@@ -209,7 +223,7 @@ export class RUES {
         status: "success";
         statusCode: number;
       }
-    | { data: unknown; status: "error"; statusCode: number }
+    | { data: unknown; status: "error"; statusCode?: number }
   > {
     if (!this.token) {
       return {
@@ -222,33 +236,40 @@ export class RUES {
       };
     }
 
-    const searchParams = new URLSearchParams({
-      codigo_camara: options.chamberCode,
-      matricula: options.businessRegistrationNumber,
-    });
-    const response = await fetch(
-      `${RUES.baseUrl}/api/PropietarioEstXCamaraYMatricula?${searchParams}`,
-      {
-        headers: {
-          authorization: `Bearer ${this.token}`,
-          "content-type": "application/json",
-        },
-        method: "POST",
+    try {
+      const searchParams = new URLSearchParams({
+        codigo_camara: options.chamberCode,
+        matricula: options.businessRegistrationNumber,
+      });
+      const response = await fetch(
+        `${RUES.baseUrl}/api/PropietarioEstXCamaraYMatricula?${searchParams}`,
+        {
+          headers: {
+            authorization: `Bearer ${this.token}`,
+            "content-type": "application/json",
+          },
+          method: "POST",
+        }
+      );
+      const data = await response.json();
+      if (!response.ok) {
+        return {
+          data,
+          status: "error",
+          statusCode: response.status,
+        };
       }
-    );
-    const data = await response.json();
-    if (!response.ok) {
       return {
-        data,
-        status: "error",
+        data: data as BusinessEstablishmentsResponse,
+        status: "success",
         statusCode: response.status,
       };
+    } catch (error) {
+      return {
+        data: error,
+        status: "error",
+      };
     }
-    return {
-      data: data as BusinessEstablishmentsResponse,
-      status: "success",
-      statusCode: response.status,
-    };
   }
 
   async getBusinessEstablishmentsByNit(nit: number) {
@@ -273,23 +294,30 @@ export class RUES {
     id: string
   ): Promise<
     | { data: FileResponse; status: "success"; statusCode: number }
-    | { data: unknown; status: "error"; statusCode: number }
+    | { data: unknown; status: "error"; statusCode?: number }
   > {
-    const response = await fetch(
-      `${RUES.baseUrl}/WEB2/api/Expediente/DetalleRM/${id}`
-    );
-    const data = await response.json();
-    if (!response.ok) {
+    try {
+      const response = await fetch(
+        `${RUES.baseUrl}/WEB2/api/Expediente/DetalleRM/${id}`
+      );
+      const data = await response.json();
+      if (!response.ok) {
+        return {
+          data,
+          status: "error",
+          statusCode: response.status,
+        };
+      }
       return {
-        data,
-        status: "error",
+        data: data as FileResponse,
+        status: "success",
         statusCode: response.status,
       };
+    } catch (error) {
+      return {
+        data: error,
+        status: "error",
+      };
     }
-    return {
-      data: data as FileResponse,
-      status: "success",
-      statusCode: response.status,
-    };
   }
 }
