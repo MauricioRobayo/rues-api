@@ -1,14 +1,20 @@
 import { RUES } from "..";
 
-const token = await RUES.getToken();
-const rues = new RUES(token);
+const tokenResponse = await RUES.getToken();
+
+if (tokenResponse.status === "error") {
+  console.error(tokenResponse);
+  process.exit(1);
+}
+
+const rues = new RUES(tokenResponse.data.token);
 
 try {
   const response = await rues.getBusinessEstablishments({
     businessRegistrationNumber: "0001763070",
     chamberCode: "04",
   });
-  console.log(response);
+  console.dir(response, { depth: Infinity });
 } catch (err) {
   console.error(err);
 }
