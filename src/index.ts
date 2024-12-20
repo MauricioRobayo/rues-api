@@ -127,7 +127,10 @@ export class RUES {
     };
   }
 
-  static async getToken() {
+  static async getToken(): Promise<
+    | { data: unknown; status: "error"; statusCode: number }
+    | { data: { token: string }; status: "success"; statusCode: number }
+  > {
     const response = await fetch(
       `${RUES.baseUrl}/WEB2/api/Token/ObtenerToken`,
       {
@@ -135,19 +138,36 @@ export class RUES {
       }
     );
     const token = response.headers.get("tokenRuesAPI");
+    const data = await response.json();
     if (!token) {
-      throw new Error(
-        `Failed to get token! Response status: ${response.status}.`
-      );
+      return {
+        data,
+        status: "error",
+        statusCode: response.status,
+      };
     }
-    return token;
+    return {
+      data: { token },
+      status: "success",
+      statusCode: response.status,
+    };
   }
 
-  async advancedSearch(query: { nit: string }) {
+  async advancedSearch(
+    query: { matricula: string } | { nit: number } | { razon: string }
+  ): Promise<
+    | { data: AdvancedSearchResponse; status: "success"; statusCode: number }
+    | { data: unknown; status: "error"; statusCode: number }
+  > {
     if (!this.token) {
-      throw new Error(
-        "Token is required to perform advanced search. Please provide a token. Use `const token = await RUES.getToken()` to get a token."
-      );
+      return {
+        data: {
+          message:
+            "Please provide a token when instantiating the class. You can get a token using the static getToken method: `const token = await RUES.getToken()`",
+        },
+        status: "error",
+        statusCode: 401,
+      };
     }
 
     const headers = new Headers();
@@ -163,19 +183,45 @@ export class RUES {
       `${RUES.baseUrl}/api/ConsultasRUES/BusquedaAvanzadaRM`,
       requestOptions
     );
+
+    const data = await response.json();
     if (!response.ok) {
-      throw new Error(
-        `Failed to get advanced search! Response status: ${response.status}.`
-      );
+      return {
+        data,
+        status: "error",
+        statusCode: response.status,
+      };
     }
 
-    return response.json() as Promise<AdvancedSearchResponse>;
+    return {
+      data: data as AdvancedSearchResponse,
+      status: "success",
+      statusCode: response.status,
+    };
   }
 
   async getBusinessEstablishments(options: {
     businessRegistrationNumber: string;
     chamberCode: string;
-  }) {
+  }): Promise<
+    | {
+        data: BusinessEstablishmentsResponse;
+        status: "success";
+        statusCode: number;
+      }
+    | { data: unknown; status: "error"; statusCode: number }
+  > {
+    if (!this.token) {
+      return {
+        data: {
+          message:
+            "Please provide a token when instantiating the class. You can get a token using the static getToken method: `const token = await RUES.getToken()`",
+        },
+        status: "error",
+        statusCode: 401,
+      };
+    }
+
     const searchParams = new URLSearchParams({
       codigo_camara: options.chamberCode,
       matricula: options.businessRegistrationNumber,
@@ -190,17 +236,27 @@ export class RUES {
         method: "POST",
       }
     );
+    const data = await response.json();
     if (!response.ok) {
-      throw new Error(
-        `Failed to get establishments! Response status: ${response.status}.`
-      );
+      return {
+        data,
+        status: "error",
+        statusCode: response.status,
+      };
     }
-    return response.json() as Promise<BusinessEstablishmentsResponse>;
+    return {
+      data: data as BusinessEstablishmentsResponse,
+      status: "success",
+      statusCode: response.status,
+    };
   }
 
-  async getBusinessEstablishmentsByNit(nit: string) {
-    const business = await this.advancedSearch({ nit });
-    const businessRegistrationId = business.registros?.at(0)?.id_rm;
+  async getBusinessEstablishmentsByNit(nit: number) {
+    const response = await this.advancedSearch({ nit });
+    if (response.status === "error") {
+      return response;
+    }
+    const businessRegistrationId = response.data.registros?.at(0)?.id_rm;
     if (!businessRegistrationId) {
       throw new Error("NIT not found!");
     }
@@ -213,15 +269,27 @@ export class RUES {
     });
   }
 
-  async getFile(id: string) {
+  async getFile(
+    id: string
+  ): Promise<
+    | { data: FileResponse; status: "success"; statusCode: number }
+    | { data: unknown; status: "error"; statusCode: number }
+  > {
     const response = await fetch(
       `${RUES.baseUrl}/WEB2/api/Expediente/DetalleRM/${id}`
     );
+    const data = await response.json();
     if (!response.ok) {
-      throw new Error(
-        `Failed to get file! Response status: ${response.status}.`
-      );
+      return {
+        data,
+        status: "error",
+        statusCode: response.status,
+      };
     }
-    return response.json() as Promise<FileResponse>;
+    return {
+      data: data as FileResponse,
+      status: "success",
+      statusCode: response.status,
+    };
   }
 }

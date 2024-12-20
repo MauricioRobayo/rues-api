@@ -1,7 +1,6 @@
 import { RUES } from "..";
 
 const token = await RUES.getToken();
-
 const rues = new RUES(token);
 
 try {
