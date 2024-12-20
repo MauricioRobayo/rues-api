@@ -17,8 +17,14 @@
     "test:watch": "vitest"
   },
   "keywords": [
-    "typescript",
-    "library"
+    "RUES",
+    "NIT",
+    "API",
+    "Cámara de Comercio",
+    "Colombia",
+    "RUES API",
+    "NIT API",
+    "Registro Único Empresarial y Social"
   ],
   "author": "Mauricio Robayo",
   "license": "MIT",
