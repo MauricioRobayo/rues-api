@@ -1,6 +1,6 @@
 # RUES API
 
-Wrapper for the Registro Único Empresarial y Social API.
+Nodejs client for the Registro Único Empresarial y Social API.
 
 ## Install
 
