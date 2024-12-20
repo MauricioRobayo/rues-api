@@ -107,6 +107,12 @@ interface BusinessRecord {
   tipo_documento: string;
   ultimo_ano_renovado: string;
 }
+
+type RuesResponse<T> = Promise<
+  | { data: T; status: "success"; statusCode: number }
+  | { data: unknown; status: "error"; statusCode?: number }
+>;
+
 export class RUES {
   private static readonly baseUrl = "https://ruesapi.rues.org.co";
 
@@ -127,10 +133,7 @@ export class RUES {
     };
   }
 
-  static async getToken(): Promise<
-    | { data: unknown; status: "error"; statusCode?: number }
-    | { data: { token: string }; status: "success"; statusCode: number }
-  > {
+  static async getToken(): RuesResponse<{ token: string }> {
     try {
       const response = await fetch(
         `${RUES.baseUrl}/WEB2/api/Token/ObtenerToken`,
@@ -162,10 +165,7 @@ export class RUES {
 
   async advancedSearch(
     query: { matricula: string } | { nit: number } | { razon: string }
-  ): Promise<
-    | { data: AdvancedSearchResponse; status: "success"; statusCode: number }
-    | { data: unknown; status: "error"; statusCode?: number }
-  > {
+  ): RuesResponse<AdvancedSearchResponse> {
     if (!this.token) {
       return {
         data: {
@@ -217,14 +217,7 @@ export class RUES {
   async getBusinessEstablishments(options: {
     businessRegistrationNumber: string;
     chamberCode: string;
-  }): Promise<
-    | {
-        data: BusinessEstablishmentsResponse;
-        status: "success";
-        statusCode: number;
-      }
-    | { data: unknown; status: "error"; statusCode?: number }
-  > {
+  }): RuesResponse<BusinessEstablishmentsResponse> {
     if (!this.token) {
       return {
         data: {
@@ -290,12 +283,7 @@ export class RUES {
     });
   }
 
-  async getFile(
-    id: string
-  ): Promise<
-    | { data: FileResponse; status: "success"; statusCode: number }
-    | { data: unknown; status: "error"; statusCode?: number }
-  > {
+  async getFile(id: string): RuesResponse<FileResponse> {
     try {
       const response = await fetch(
         `${RUES.baseUrl}/WEB2/api/Expediente/DetalleRM/${id}`
