@@ -1,15 +1,65 @@
-import { readFile, writeFile } from "fs/promises";
-import path from "path";
-
-const baseUrl = "https://ruesapi.rues.org.co";
-const publicDir = path.join(process.cwd(), "public", "establishments");
-
 export interface AdvancedSearchResponse {
   cant_registros: number;
   error: Error;
   fecha_respuesta: string;
   hora_respuesta: string;
   registros?: BusinessRecord[];
+}
+
+export interface File {
+  camara: string;
+  categoria_matricula: string;
+  ciiu3: string;
+  ciiu4: string;
+  clase_identificacion: string;
+  cod_camara: string;
+  cod_ciiu_act_econ_pri: string;
+  cod_ciiu_act_econ_sec: string;
+  cod_tipo_sociedad: string;
+  desc_ciiu3: string;
+  desc_ciiu4: string;
+  desc_ciiu_act_econ_pri: string;
+  desc_ciiu_act_econ_sec: string;
+  dir_comercial: null;
+  dir_fiscal: null;
+  dv: string;
+  email_com: null;
+  email_fiscal: null;
+  estado: string;
+  extincion_dominio: string;
+  fecha_actualizacion: string;
+  fecha_cancelacion: string;
+  fecha_matricula: string;
+  fecha_renovacion: string;
+  fecha_vigencia: string;
+  id: string;
+  indicador_emprendimiento_social: string;
+  matricula: string;
+  motivo_cancelacion: string;
+  mun_comercial: null | string;
+  mun_fiscal: null | string;
+  numero_identificacion: string;
+  numero_identificacion_2: string;
+  organizacion_juridica: string;
+  razon_social: string;
+  sigla: null | string;
+  tel_com_1: null | string;
+  tel_com_2: null | string;
+  tel_com_3: null | string;
+  tel_fiscal_1: null | string;
+  tel_fiscal_2: null | string;
+  tel_fiscal_3: null | string;
+  tipo_sociedad: string;
+  ultimo_ano_renovado: string;
+  url_venta_certificados: string;
+}
+
+export interface FileResponse {
+  codigo_error: string;
+  fecha_respuesta: Date;
+  hora_respuesta: string;
+  mensaje_error: null;
+  registros: File;
 }
 
 interface BusinessEstablishment {
@@ -33,7 +83,6 @@ interface BusinessEstablishment {
   SIGLA: string;
   ULTIMO_ANO_RENOVADO: number;
 }
-
 interface BusinessEstablishmentsResponse {
   cant_Registros: number;
   code: string;
@@ -58,146 +107,121 @@ interface BusinessRecord {
   tipo_documento: string;
   ultimo_ano_renovado: string;
 }
+export class RUES {
+  private static readonly baseUrl = "https://ruesapi.rues.org.co";
 
-interface Error {
-  code: string;
-  message: string;
-}
+  get baseUrl() {
+    return RUES.baseUrl;
+  }
 
-export async function getEstablishments({
-  NIT,
-  token,
-}: {
-  NIT: string;
-  token?: string;
-}) {
-  const dataFile = path.join(publicDir, `${NIT}.json`);
-  try {
-    const data: { chamber: string; name: string; registry: string }[] =
-      JSON.parse(await readFile(dataFile, "utf-8"));
-    console.log(
-      `Found data file for "${NIT}". Returning data from disk with ${data.length} establishments.`
+  constructor(private readonly token?: string) {}
+
+  static getBusinessDetails(businessRegistrationId: string) {
+    const businessRegistrationNumber = businessRegistrationId.slice(-10);
+    const chamberCode = businessRegistrationId
+      .replace(businessRegistrationNumber, "")
+      .padStart(2, "0");
+    return {
+      businessRegistrationNumber,
+      chamberCode,
+    };
+  }
+
+  static async getToken() {
+    const response = await fetch(
+      `${RUES.baseUrl}/WEB2/api/Token/ObtenerToken`,
+      {
+        method: "POST",
+      }
     );
-    return data;
-  } catch {
-    let apiToken = token;
-    if (!apiToken) {
-      console.log("No token provided. Getting a new token.");
-      apiToken = await getToken();
-    }
-    console.log(`Getting business record for ${NIT}...`);
-    const rues = await advancedSearch({
-      apiToken,
-      query: { Nit: NIT },
-    });
-    const businessRegistrationId = rues.registros?.at(0)?.id_rm;
-    if (!businessRegistrationId) {
-      console.error(
-        "Cound not find business registration id for",
-        NIT,
-        JSON.stringify(rues)
+    const token = response.headers.get("tokenRuesAPI");
+    if (!token) {
+      throw new Error(
+        `Failed to get token! Response status: ${response.status}.`
       );
-      return [];
     }
-    const { businessRegistrationNumber, chamberCode } = getBusinessDetails(
+    return token;
+  }
+
+  async advancedSearch(query: { nit: string }) {
+    if (!this.token) {
+      throw new Error(
+        "Token is required to perform advanced search. Please provide a token. Use `const token = await RUES.getToken()` to get a token."
+      );
+    }
+
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+    headers.append("Authorization", `Bearer ${this.token}`);
+
+    const requestOptions = {
+      body: JSON.stringify(query),
+      headers: headers,
+      method: "POST",
+    };
+    const response = await fetch(
+      `${RUES.baseUrl}/api/ConsultasRUES/BusquedaAvanzadaRM`,
+      requestOptions
+    );
+    if (!response.ok) {
+      throw new Error(
+        `Failed to get advanced search! Response status: ${response.status}.`
+      );
+    }
+
+    return response.json() as Promise<AdvancedSearchResponse>;
+  }
+
+  async getBusinessEstablishments(options: {
+    businessRegistrationNumber: string;
+    chamberCode: string;
+  }) {
+    const searchParams = new URLSearchParams({
+      codigo_camara: options.chamberCode,
+      matricula: options.businessRegistrationNumber,
+    });
+    const response = await fetch(
+      `${RUES.baseUrl}/api/PropietarioEstXCamaraYMatricula?${searchParams}`,
+      {
+        headers: {
+          authorization: `Bearer ${this.token}`,
+          "content-type": "application/json",
+        },
+        method: "POST",
+      }
+    );
+    if (!response.ok) {
+      throw new Error(
+        `Failed to get establishments! Response status: ${response.status}.`
+      );
+    }
+    return response.json() as Promise<BusinessEstablishmentsResponse>;
+  }
+
+  async getBusinessEstablishmentsByNit(nit: string) {
+    const business = await this.advancedSearch({ nit });
+    const businessRegistrationId = business.registros?.at(0)?.id_rm;
+    if (!businessRegistrationId) {
+      throw new Error("NIT not found!");
+    }
+    const { businessRegistrationNumber, chamberCode } = RUES.getBusinessDetails(
       businessRegistrationId
     );
-    console.log(
-      `Getting business establishments for ${chamberCode} - ${businessRegistrationNumber}...`
-    );
-    const response = await getBusinessEstablishments({
-      apiToken,
+    return this.getBusinessEstablishments({
       businessRegistrationNumber,
       chamberCode,
     });
-    const establishments = (response.registros ?? [])
-      .filter((record) => record.DESC_ESTADO_MATRICULA === "ACTIVA")
-      .map((record) => ({
-        chamber: record.DESC_CAMARA,
-        name: record.RAZON_SOCIAL,
-        registry: record.MATRICULA,
-      }));
-    console.log(`Found ${establishments.length} establishments.`);
-    await writeFile(dataFile, JSON.stringify(establishments));
-    return establishments;
   }
-}
 
-async function advancedSearch({
-  apiToken,
-  query,
-}: {
-  apiToken: string;
-  query:
-    | { Cod_Camara: string }
-    | { Dpto: string }
-    | { Matricula: string }
-    | { Nit: string }
-    | { Razon: string };
-}) {
-  const response = await fetch(
-    `${baseUrl}/api/ConsultasRUES/BusquedaAvanzadaRM`,
-    {
-      body: JSON.stringify(query),
-      headers: {
-        authorization: `Bearer ${apiToken}`,
-        "content-type": "application/json",
-      },
-      method: "POST",
+  async getFile(id: string) {
+    const response = await fetch(
+      `${RUES.baseUrl}/WEB2/api/Expediente/DetalleRM/${id}`
+    );
+    if (!response.ok) {
+      throw new Error(
+        `Failed to get file! Response status: ${response.status}.`
+      );
     }
-  );
-  const data = (await response.json()) as AdvancedSearchResponse;
-  return data;
-}
-
-function getBusinessDetails(businessRegistrationId: string) {
-  const businessRegistrationNumber = businessRegistrationId.slice(-10);
-  const chamberCode = businessRegistrationId
-    .replace(businessRegistrationNumber, "")
-    .padStart(2, "0");
-  return {
-    businessRegistrationNumber,
-    chamberCode,
-  };
-}
-
-async function getBusinessEstablishments({
-  apiToken,
-  businessRegistrationNumber,
-  chamberCode,
-}: {
-  apiToken: string;
-  businessRegistrationNumber: string;
-  chamberCode: string;
-}) {
-  const searchParams = new URLSearchParams({
-    Codigo_camara: chamberCode,
-    Matricula: businessRegistrationNumber,
-  });
-  const response = await fetch(
-    `${baseUrl}/api/PropietarioEstXCamaraYMatricula?${searchParams}`,
-    {
-      headers: {
-        authorization: `Bearer ${apiToken}`,
-        "content-type": "application/json",
-      },
-      method: "POST",
-    }
-  );
-  const data = (await response.json()) as BusinessEstablishmentsResponse;
-  return data;
-}
-
-async function getToken() {
-  const response = await fetch(`${baseUrl}/WEB2/api/Token/ObtenerToken`, {
-    method: "POST",
-  });
-  const token = response.headers.get("tokenRuesAPI");
-  if (!token) {
-    throw new Error("Could not get token");
+    return response.json() as Promise<FileResponse>;
   }
-  console.log(
-    `Successfully got a new token: "${token.slice(0, 4)}${"*".repeat(10)}"`
-  );
-  return token;
 }
