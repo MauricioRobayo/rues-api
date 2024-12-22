@@ -1,5 +1,5 @@
 {
-  "name": "rues-api",
+  "name": "@mauriciorobayo/rues-api",
   "version": "0.1.2",
   "description": "RUES API wrapper",
   "main": "dist/index.js",
