@@ -10,7 +10,9 @@ if (tokenResponse.status === "error") {
 const rues = new RUES(tokenResponse.data.token);
 
 const response = await rues.getBusinessEstablishments({
-  businessRegistrationNumber: "0001763070",
-  chamberCode: "04",
+  query: {
+    businessRegistrationNumber: "0001763070",
+    chamberCode: "04",
+  },
 });
 console.dir(response, { depth: Infinity });

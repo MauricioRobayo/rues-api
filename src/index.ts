@@ -1,3 +1,5 @@
+import retry from "async-retry";
+
 export interface AdvancedSearchResponse {
   cant_registros: number;
   error: Error;
@@ -108,6 +110,13 @@ interface BusinessRecord {
   ultimo_ano_renovado: string;
 }
 
+interface RetryOptions {
+  minTimeout?: number;
+  retries?: number;
+}
+
+const defaultRetryOptions: RetryOptions = { minTimeout: 1000, retries: 3 };
+
 type RuesResponse<T> = Promise<
   | { data: T; status: "success"; statusCode: number }
   | { data: unknown; status: "error"; statusCode?: number }
@@ -133,28 +142,43 @@ export class RUES {
     };
   }
 
-  static async getToken(): RuesResponse<{ token: string }> {
+  static async getToken({
+    minTimeout = defaultRetryOptions.minTimeout,
+    retries = defaultRetryOptions.retries,
+  }: RetryOptions = {}): RuesResponse<{ token: string }> {
     try {
-      const response = await fetch(
-        `${RUES.baseUrl}/WEB2/api/Token/ObtenerToken`,
+      const response = await retry(
+        async () => {
+          const response = await fetch(
+            `${RUES.baseUrl}/WEB2/api/Token/ObtenerToken`,
+            {
+              method: "POST",
+            }
+          );
+          const token = response.headers.get("tokenRuesAPI");
+          const data = await response.json();
+          if (!token) {
+            return {
+              data,
+              status: "error",
+              statusCode: response.status,
+            } as const;
+          }
+          return {
+            data: { token },
+            status: "success",
+            statusCode: response.status,
+          } as const;
+        },
         {
-          method: "POST",
+          minTimeout,
+          onRetry: (error, attempt) => {
+            console.log(`Attempt ${attempt}: ${error.message}`);
+          },
+          retries,
         }
       );
-      const token = response.headers.get("tokenRuesAPI");
-      const data = await response.json();
-      if (!token) {
-        return {
-          data,
-          status: "error",
-          statusCode: response.status,
-        };
-      }
-      return {
-        data: { token },
-        status: "success",
-        statusCode: response.status,
-      };
+      return response;
     } catch (error) {
       return {
         data: error,
@@ -163,9 +187,16 @@ export class RUES {
     }
   }
 
-  async advancedSearch(
-    query: { matricula: string } | { nit: number } | { razon: string }
-  ): RuesResponse<AdvancedSearchResponse> {
+  async advancedSearch({
+    query,
+    retryOptions: {
+      minTimeout = defaultRetryOptions.minTimeout,
+      retries = defaultRetryOptions.retries,
+    } = {},
+  }: {
+    query: { matricula: string } | { nit: number } | { razon: string };
+    retryOptions?: RetryOptions;
+  }): RuesResponse<AdvancedSearchResponse> {
     if (!this.token) {
       return {
         data: {
@@ -178,34 +209,48 @@ export class RUES {
     }
 
     try {
-      const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      headers.append("Authorization", `Bearer ${this.token}`);
+      const response = await retry(
+        async () => {
+          const headers = new Headers();
+          headers.append("Content-Type", "application/json");
+          headers.append("Authorization", `Bearer ${this.token}`);
 
-      const requestOptions = {
-        body: JSON.stringify(query),
-        headers: headers,
-        method: "POST",
-      };
-      const response = await fetch(
-        `${RUES.baseUrl}/api/ConsultasRUES/BusquedaAvanzadaRM`,
-        requestOptions
+          const requestOptions = {
+            body: JSON.stringify(query),
+            headers: headers,
+            method: "POST",
+          };
+
+          const response = await fetch(
+            `${RUES.baseUrl}/api/ConsultasRUES/BusquedaAvanzadaRM`,
+            requestOptions
+          );
+
+          const data = await response.json();
+          if (!response.ok) {
+            return {
+              data,
+              status: "error",
+              statusCode: response.status,
+            } as const;
+          }
+
+          return {
+            data: data as AdvancedSearchResponse,
+            status: "success",
+            statusCode: response.status,
+          } as const;
+        },
+        {
+          minTimeout,
+          onRetry: (error, attempt) => {
+            console.log(`Attempt ${attempt}: ${error}`);
+          },
+          retries,
+          // maxTimeout
+        }
       );
-
-      const data = await response.json();
-      if (!response.ok) {
-        return {
-          data,
-          status: "error",
-          statusCode: response.status,
-        };
-      }
-
-      return {
-        data: data as AdvancedSearchResponse,
-        status: "success",
-        statusCode: response.status,
-      };
+      return response;
     } catch (error) {
       return {
         data: error,
@@ -214,9 +259,15 @@ export class RUES {
     }
   }
 
-  async getBusinessEstablishments(options: {
-    businessRegistrationNumber: string;
-    chamberCode: string;
+  async getBusinessEstablishments({
+    query,
+    retryOptions: {
+      minTimeout = defaultRetryOptions.minTimeout,
+      retries = defaultRetryOptions.retries,
+    } = {},
+  }: {
+    query: { businessRegistrationNumber: string; chamberCode: string };
+    retryOptions?: RetryOptions;
   }): RuesResponse<BusinessEstablishmentsResponse> {
     if (!this.token) {
       return {
@@ -230,33 +281,45 @@ export class RUES {
     }
 
     try {
-      const searchParams = new URLSearchParams({
-        codigo_camara: options.chamberCode,
-        matricula: options.businessRegistrationNumber,
-      });
-      const response = await fetch(
-        `${RUES.baseUrl}/api/PropietarioEstXCamaraYMatricula?${searchParams}`,
+      const response = await retry(
+        async () => {
+          const searchParams = new URLSearchParams({
+            codigo_camara: query.chamberCode,
+            matricula: query.businessRegistrationNumber,
+          });
+          const response = await fetch(
+            `${RUES.baseUrl}/api/PropietarioEstXCamaraYMatricula?${searchParams}`,
+            {
+              headers: {
+                authorization: `Bearer ${this.token}`,
+                "content-type": "application/json",
+              },
+              method: "POST",
+            }
+          );
+          const data = await response.json();
+          if (!response.ok) {
+            return {
+              data,
+              status: "error",
+              statusCode: response.status,
+            } as const;
+          }
+          return {
+            data: data as BusinessEstablishmentsResponse,
+            status: "success",
+            statusCode: response.status,
+          } as const;
+        },
         {
-          headers: {
-            authorization: `Bearer ${this.token}`,
-            "content-type": "application/json",
+          minTimeout,
+          onRetry: (error, attempt) => {
+            console.log(`Attempt ${attempt}: ${error}`);
           },
-          method: "POST",
+          retries,
         }
       );
-      const data = await response.json();
-      if (!response.ok) {
-        return {
-          data,
-          status: "error",
-          statusCode: response.status,
-        };
-      }
-      return {
-        data: data as BusinessEstablishmentsResponse,
-        status: "success",
-        statusCode: response.status,
-      };
+      return response;
     } catch (error) {
       return {
         data: error,
@@ -265,8 +328,17 @@ export class RUES {
     }
   }
 
-  async getBusinessEstablishmentsByNit(nit: number) {
-    const response = await this.advancedSearch({ nit });
+  async getBusinessEstablishmentsByNit(
+    nit: number,
+    {
+      minTimeout = defaultRetryOptions.minTimeout,
+      retries = defaultRetryOptions.retries,
+    }: RetryOptions = {}
+  ) {
+    const response = await this.advancedSearch({
+      query: { nit },
+      retryOptions: { minTimeout, retries },
+    });
     if (response.status === "error") {
       return response;
     }
@@ -278,8 +350,11 @@ export class RUES {
       businessRegistrationId
     );
     return this.getBusinessEstablishments({
-      businessRegistrationNumber,
-      chamberCode,
+      query: {
+        businessRegistrationNumber,
+        chamberCode,
+      },
+      retryOptions: { minTimeout, retries },
     });
   }
 
