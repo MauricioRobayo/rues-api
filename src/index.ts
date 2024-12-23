@@ -124,6 +124,10 @@ type RuesResponse<T> = Promise<
 
 type WithRetryOptions<T> = T & { retryOptions?: RetryOptions };
 
+const defaultRetryOptions: RetryOptions = {
+  minTimeout: 1000,
+  retries: 3,
+};
 export class RUES {
   private static readonly baseUrl = "https://ruesapi.rues.org.co";
   get baseUrl() {
@@ -134,7 +138,10 @@ export class RUES {
 
   constructor(
     private readonly token?: string,
-    { minTimeout = 1000, retries = 3 }: RetryOptions = {}
+    {
+      minTimeout = defaultRetryOptions.minTimeout,
+      retries = defaultRetryOptions.retries,
+    }: RetryOptions = {}
   ) {
     this.retryOptions = {
       minTimeout,
@@ -154,8 +161,8 @@ export class RUES {
   }
 
   static async getToken({
-    minTimeout = 1000,
-    retries = 3,
+    minTimeout = defaultRetryOptions.minTimeout,
+    retries = defaultRetryOptions.retries,
   }: RetryOptions = {}): RuesResponse<{ token: string }> {
     const fetchToken = async () => {
       const response = await fetch(
