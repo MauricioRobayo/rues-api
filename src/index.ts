@@ -117,21 +117,30 @@ interface RetryOptions {
   retries?: number;
 }
 
-const defaultRetryOptions: RetryOptions = { minTimeout: 1000, retries: 3 };
-
 type RuesResponse<T> = Promise<
   | { data: T; status: "success"; statusCode: number }
   | { data: unknown; status: "error"; statusCode?: number }
 >;
 
+type WithRetryOptions<T> = T & { retryOptions?: RetryOptions };
+
 export class RUES {
   private static readonly baseUrl = "https://ruesapi.rues.org.co";
-
   get baseUrl() {
     return RUES.baseUrl;
   }
 
-  constructor(private readonly token?: string) {}
+  private readonly retryOptions: RetryOptions = {};
+
+  constructor(
+    private readonly token?: string,
+    { minTimeout = 1000, retries = 3 }: RetryOptions = {}
+  ) {
+    this.retryOptions = {
+      minTimeout,
+      retries,
+    };
+  }
 
   static getBusinessDetails(businessRegistrationId: string) {
     const businessRegistrationNumber = businessRegistrationId.slice(-10);
@@ -145,42 +154,41 @@ export class RUES {
   }
 
   static async getToken({
-    minTimeout = defaultRetryOptions.minTimeout,
-    retries = defaultRetryOptions.retries,
+    minTimeout = 1000,
+    retries = 3,
   }: RetryOptions = {}): RuesResponse<{ token: string }> {
-    try {
-      const response = await retry(
-        async () => {
-          const response = await fetch(
-            `${RUES.baseUrl}/WEB2/api/Token/ObtenerToken`,
-            {
-              method: "POST",
-            }
-          );
-          if (!response.ok) {
-            throw new HttpError(response.status, "Failed to fetch");
-          }
-          const token = response.headers.get("tokenRuesAPI");
-          const data = await response.json();
-          if (!token) {
-            return {
-              data,
-              status: "error",
-              statusCode: response.status,
-            } as const;
-          }
-          return {
-            data: { token },
-            status: "success",
-            statusCode: response.status,
-          } as const;
-        },
+    const fetchToken = async () => {
+      const response = await fetch(
+        `${RUES.baseUrl}/WEB2/api/Token/ObtenerToken`,
         {
-          minTimeout,
-          onRetry,
-          retries,
+          method: "POST",
         }
       );
+      if (!response.ok) {
+        throw new HttpError(response.status, "Failed to fetch");
+      }
+      const token = response.headers.get("tokenRuesAPI");
+      const data = await response.json();
+      if (!token) {
+        return {
+          data,
+          status: "error",
+          statusCode: response.status,
+        } as const;
+      }
+      return {
+        data: { token },
+        status: "success",
+        statusCode: response.status,
+      } as const;
+    };
+
+    try {
+      const response = await retry(fetchToken, {
+        minTimeout,
+        onRetry,
+        retries,
+      });
       return response;
     } catch (error) {
       return failedRequestResponse(error);
@@ -189,16 +197,12 @@ export class RUES {
 
   async advancedSearch({
     query,
-    retryOptions: {
-      minTimeout = defaultRetryOptions.minTimeout,
-      retries = defaultRetryOptions.retries,
-    } = {},
+    retryOptions,
     token = this.token,
-  }: {
+  }: WithRetryOptions<{
     query: { matricula: string } | { nit: number } | { razon: string };
-    retryOptions?: RetryOptions;
     token?: string;
-  }): RuesResponse<AdvancedSearchResponse> {
+  }>): RuesResponse<AdvancedSearchResponse> {
     if (!token) {
       return {
         data: {
@@ -208,51 +212,48 @@ export class RUES {
       };
     }
 
-    try {
-      const headers = new Headers();
-      headers.append("Content-Type", "application/json");
-      headers.append("Authorization", `Bearer ${this.token}`);
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+    headers.append("Authorization", `Bearer ${this.token}`);
 
+    const fetchRues = async (bail: (e: unknown) => void) => {
       const requestOptions = {
         body: JSON.stringify(query),
         headers: headers,
         method: "POST",
       };
-
-      const response = await retry(
-        async (bail) => {
-          const response = await fetch(
-            `${RUES.baseUrl}/api/ConsultasRUES/BusquedaAvanzadaRM`,
-            requestOptions
-          );
-
-          const data = await response.json();
-
-          if (response.ok) {
-            return {
-              data: data as AdvancedSearchResponse,
-              status: "success",
-              statusCode: response.status,
-            } as const;
-          }
-
-          if (response.status === 401) {
-            bail(new HttpError(401, "Unauthorized"));
-          } else {
-            throw new HttpError(response.status, "Failed to fetch");
-          }
-          return {
-            data,
-            status: "error",
-            statusCode: response.status,
-          } as const;
-        },
-        {
-          minTimeout,
-          onRetry,
-          retries,
-        }
+      const response = await fetch(
+        `${RUES.baseUrl}/api/ConsultasRUES/BusquedaAvanzadaRM`,
+        requestOptions
       );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        return {
+          data: data as AdvancedSearchResponse,
+          status: "success",
+          statusCode: response.status,
+        } as const;
+      }
+
+      if (response.status === 401) {
+        bail(new HttpError(401, "Unauthorized"));
+      } else {
+        throw new HttpError(response.status, "Failed to fetch");
+      }
+      return {
+        data,
+        status: "error",
+        statusCode: response.status,
+      } as const;
+    };
+
+    try {
+      const response = await retry(fetchRues, {
+        ...{ ...this.retryOptions, ...retryOptions },
+        onRetry,
+      });
       return response;
     } catch (error) {
       return failedRequestResponse(error);
@@ -261,15 +262,13 @@ export class RUES {
 
   async getBusinessEstablishments({
     query,
-    retryOptions: {
-      minTimeout = defaultRetryOptions.minTimeout,
-      retries = defaultRetryOptions.retries,
-    } = {},
-  }: {
+    retryOptions,
+    token = this.token,
+  }: WithRetryOptions<{
     query: { businessRegistrationNumber: string; chamberCode: string };
-    retryOptions?: RetryOptions;
-  }): RuesResponse<BusinessEstablishmentsResponse> {
-    if (!this.token) {
+    token?: string;
+  }>): RuesResponse<BusinessEstablishmentsResponse> {
+    if (!token) {
       return {
         data: {
           message:
@@ -280,64 +279,54 @@ export class RUES {
       };
     }
 
-    try {
-      const response = await retry(
-        async () => {
-          const searchParams = new URLSearchParams({
-            codigo_camara: query.chamberCode,
-            matricula: query.businessRegistrationNumber,
-          });
-          const response = await fetch(
-            `${RUES.baseUrl}/api/PropietarioEstXCamaraYMatricula?${searchParams}`,
-            {
-              headers: {
-                authorization: `Bearer ${this.token}`,
-                "content-type": "application/json",
-              },
-              method: "POST",
-            }
-          );
-          const data = await response.json();
-          if (!response.ok) {
-            return {
-              data,
-              status: "error",
-              statusCode: response.status,
-            } as const;
-          }
-          return {
-            data: data as BusinessEstablishmentsResponse,
-            status: "success",
-            statusCode: response.status,
-          } as const;
-        },
+    const fetchBusinessEstablishments = async () => {
+      const searchParams = new URLSearchParams({
+        codigo_camara: query.chamberCode,
+        matricula: query.businessRegistrationNumber,
+      });
+      const response = await fetch(
+        `${RUES.baseUrl}/api/PropietarioEstXCamaraYMatricula?${searchParams}`,
         {
-          minTimeout,
-          onRetry: (error, attempt) => {
-            console.log(`Attempt ${attempt}: ${error}`);
+          headers: {
+            authorization: `Bearer ${this.token}`,
+            "content-type": "application/json",
           },
-          retries,
+          method: "POST",
         }
       );
+      const data = await response.json();
+      if (!response.ok) {
+        return {
+          data,
+          status: "error",
+          statusCode: response.status,
+        } as const;
+      }
+      return {
+        data: data as BusinessEstablishmentsResponse,
+        status: "success",
+        statusCode: response.status,
+      } as const;
+    };
+
+    try {
+      const response = await retry(fetchBusinessEstablishments, {
+        ...{ ...this.retryOptions, ...retryOptions },
+        onRetry,
+      });
       return response;
     } catch (error) {
-      return {
-        data: error,
-        status: "error",
-      };
+      return failedRequestResponse(error);
     }
   }
 
-  async getBusinessEstablishmentsByNit(
-    nit: number,
-    {
-      minTimeout = defaultRetryOptions.minTimeout,
-      retries = defaultRetryOptions.retries,
-    }: RetryOptions = {}
-  ) {
+  async getBusinessEstablishmentsByNit({
+    nit,
+    retryOptions,
+  }: WithRetryOptions<{ nit: number }>) {
     const response = await this.advancedSearch({
       query: { nit },
-      retryOptions: { minTimeout, retries },
+      retryOptions,
     });
     if (response.status === "error") {
       return response;
@@ -354,33 +343,38 @@ export class RUES {
         businessRegistrationNumber,
         chamberCode,
       },
-      retryOptions: { minTimeout, retries },
+      retryOptions,
     });
   }
 
-  async getFile(id: string): RuesResponse<FileResponse> {
-    try {
+  async getFile({
+    id,
+    retryOptions,
+  }: WithRetryOptions<{ id: string }>): RuesResponse<FileResponse> {
+    const fetchFile = async () => {
       const response = await fetch(
         `${RUES.baseUrl}/WEB2/api/Expediente/DetalleRM/${id}`
       );
+
       const data = await response.json();
       if (!response.ok) {
-        return {
-          data,
-          status: "error",
-          statusCode: response.status,
-        };
+        throw new HttpError(response.status, "Failed to fetch");
       }
       return {
         data: data as FileResponse,
         status: "success",
         statusCode: response.status,
-      };
+      } as const;
+    };
+
+    try {
+      const response = await retry(fetchFile, {
+        ...{ ...this.retryOptions, ...retryOptions },
+        onRetry,
+      });
+      return response;
     } catch (error) {
-      return {
-        data: error,
-        status: "error",
-      };
+      return failedRequestResponse(error);
     }
   }
 }

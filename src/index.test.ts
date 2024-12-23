@@ -204,7 +204,7 @@ describe("advancedSearch", () => {
 describe("getFile", () => {
   test("should get the file given an id", async () => {
     const rues = new RUES();
-    const response = await rues.getFile(mockFileId);
+    const response = await rues.getFile({ id: mockFileId });
 
     expect(response).toMatchObject({
       data: mockResponse,
@@ -244,14 +244,14 @@ describe.skip("getEstablishments", () => {
   });
 });
 
+function getConsoleLogSpy() {
+  return vi.spyOn(console, "log").mockImplementation(() => null);
+}
+
 async function getToken() {
   const { data, status } = await RUES.getToken();
   if (status === "error") {
     throw new Error("Failed to get token");
   }
   return data.token;
-}
-
-function getConsoleLogSpy() {
-  return vi.spyOn(console, "log").mockImplementation(() => null);
 }
