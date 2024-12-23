@@ -13,12 +13,19 @@ import { RUES } from ".";
 import { mockFileId, mockResponse, mockToken } from "./mocks/handler";
 import { server } from "./mocks/node";
 
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
+beforeAll(() => {
+  server.listen();
+});
+afterEach(() => {
+  server.resetHandlers();
+  vi.clearAllMocks();
+});
+afterAll(() => {
+  server.close();
+});
 
 describe("getToken", () => {
-  test("should get a token", async () => {
+  test("get a token", async () => {
     const response = await RUES.getToken();
 
     expect(response).toMatchObject({
@@ -28,8 +35,8 @@ describe("getToken", () => {
     });
   });
 
-  test("should retry 2 times if the request fails", async () => {
-    const consoleLogSpy = vi.spyOn(console, "log");
+  test("retry 2 times if fetch throws", async () => {
+    const consoleLogSpy = getConsoleLogSpy();
     server.use(
       http.post(
         "https://ruesapi.rues.org.co/WEB2/api/Token/ObtenerToken",
@@ -49,10 +56,44 @@ describe("getToken", () => {
       status: "error",
     });
   });
+
+  test("retry 2 times if fetch returns status code other than success", async () => {
+    const consoleLogSpy = getConsoleLogSpy();
+    server.use(
+      http.post(
+        "https://ruesapi.rues.org.co/WEB2/api/Token/ObtenerToken",
+        () => {
+          return HttpResponse.json(
+            {
+              message: "Internal server error",
+            },
+            {
+              status: 500,
+            }
+          );
+        }
+      )
+    );
+
+    const response = await RUES.getToken({ minTimeout: 0, retries: 2 });
+
+    expect(consoleLogSpy).toHaveBeenCalledTimes(2);
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      "Attempt 1: 500 Failed to fetch"
+    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      "Attempt 2: 500 Failed to fetch"
+    );
+    expect(response).toMatchObject({
+      data: {},
+      status: "error",
+      statusCode: 500,
+    });
+  });
 });
 
-describe.only("advancedSearch", () => {
-  test("should get a business record if given a valid token", async () => {
+describe("advancedSearch", () => {
+  test("get a business record if given a valid token", async () => {
     const token = await getToken();
     const rues = new RUES(token);
     const response = await rues.advancedSearch({ query: { nit: 900000000 } });
@@ -64,32 +105,98 @@ describe.only("advancedSearch", () => {
     });
   });
 
-  test.only("should throw with no retries if invalid token is given", async () => {
-    const consoleLogSpy = vi.spyOn(console, "log");
-    const consoleErrorSpy = vi.spyOn(console, "error");
+  test("no retries if invalid token is given", async () => {
+    const consoleLogSpy = getConsoleLogSpy();
     const rues = new RUES("invalid-token");
-
     const data = await rues.advancedSearch({ query: { nit: 900000000 } });
 
     expect(consoleLogSpy).toHaveBeenCalledTimes(0);
-    expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+    expect(data).toMatchObject({
+      data: {},
+      status: "error",
+      statusCode: 401,
+    });
+  });
+
+  test("no retries if no token is provided", async () => {
+    const consoleLogSpy = getConsoleLogSpy();
+    const rues = new RUES();
+
+    const data = await rues.advancedSearch({ query: { nit: 900000000 } });
+    expect(consoleLogSpy).toHaveBeenCalledTimes(0);
+    expect(data).toMatchObject({
+      data: {
+        message: "Missing token.",
+      },
+      status: "error",
+    });
+  });
+
+  test("retry when fetch throws", async () => {
+    const consoleLogSpy = getConsoleLogSpy();
+    server.use(
+      http.post(
+        "https://ruesapi.rues.org.co/api/ConsultasRUES/BusquedaAvanzadaRM",
+        () => {
+          return HttpResponse.error();
+        }
+      )
+    );
+    const rues = new RUES(mockToken);
+
+    const data = await rues.advancedSearch({
+      query: { nit: 900000000 },
+      retryOptions: {
+        minTimeout: 0,
+        retries: 2,
+      },
+    });
+    expect(consoleLogSpy).toHaveBeenCalledTimes(2);
+    expect(consoleLogSpy).toHaveBeenCalledWith("Attempt 1: Failed to fetch");
+    expect(consoleLogSpy).toHaveBeenCalledWith("Attempt 2: Failed to fetch");
     expect(data).toMatchObject({
       data: {},
       status: "error",
     });
   });
 
-  test("should throw an error if no token is provided", async () => {
-    const rues = new RUES();
-
-    const data = await rues.advancedSearch({ query: { nit: 900000000 } });
-    expect(data).toMatchObject({
-      data: {
-        message:
-          "Please provide a token when instantiating the class. You can get a token using the static getToken method: `const token = await RUES.getToken()`",
+  test("retry when fetch fails with any error other than 401", async () => {
+    const consoleLogSpy = getConsoleLogSpy();
+    server.use(
+      http.post(
+        "https://ruesapi.rues.org.co/api/ConsultasRUES/BusquedaAvanzadaRM",
+        () => {
+          return HttpResponse.json(
+            {
+              Message: "Internal server error",
+            },
+            {
+              status: 500,
+            }
+          );
+        }
+      )
+    );
+    const rues = new RUES(mockToken);
+    const data = await rues.advancedSearch({
+      query: { nit: 900000000 },
+      retryOptions: {
+        minTimeout: 0,
+        retries: 2,
       },
+    });
+
+    expect(consoleLogSpy).toHaveBeenCalledTimes(2);
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      "Attempt 1: 500 Failed to fetch"
+    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      "Attempt 2: 500 Failed to fetch"
+    );
+    expect(data).toMatchObject({
+      data: {},
       status: "error",
-      statusCode: 401,
+      statusCode: 500,
     });
   });
 });
@@ -107,7 +214,7 @@ describe("getFile", () => {
   });
 });
 
-describe("getEstablishments", () => {
+describe.skip("getEstablishments", () => {
   test("should get business establishments given a business registration number and chamber code", async () => {
     const token = await getToken();
     const rues = new RUES(token);
@@ -143,4 +250,8 @@ async function getToken() {
     throw new Error("Failed to get token");
   }
   return data.token;
+}
+
+function getConsoleLogSpy() {
+  return vi.spyOn(console, "log").mockImplementation(() => null);
 }

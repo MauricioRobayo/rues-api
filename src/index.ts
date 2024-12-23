@@ -1,5 +1,7 @@
 import retry from "async-retry";
 
+import { HttpError } from "./httpError";
+
 export interface AdvancedSearchResponse {
   cant_registros: number;
   error: Error;
@@ -155,6 +157,9 @@ export class RUES {
               method: "POST",
             }
           );
+          if (!response.ok) {
+            throw new HttpError(response.status, "Failed to fetch");
+          }
           const token = response.headers.get("tokenRuesAPI");
           const data = await response.json();
           if (!token) {
@@ -172,18 +177,13 @@ export class RUES {
         },
         {
           minTimeout,
-          onRetry: (error, attempt) => {
-            console.log(`Attempt ${attempt}: ${error.message}`);
-          },
+          onRetry,
           retries,
         }
       );
       return response;
     } catch (error) {
-      return {
-        data: error,
-        status: "error",
-      };
+      return failedRequestResponse(error);
     }
   }
 
@@ -193,34 +193,34 @@ export class RUES {
       minTimeout = defaultRetryOptions.minTimeout,
       retries = defaultRetryOptions.retries,
     } = {},
+    token = this.token,
   }: {
     query: { matricula: string } | { nit: number } | { razon: string };
     retryOptions?: RetryOptions;
+    token?: string;
   }): RuesResponse<AdvancedSearchResponse> {
-    if (!this.token) {
+    if (!token) {
       return {
         data: {
-          message:
-            "Please provide a token when instantiating the class. You can get a token using the static getToken method: `const token = await RUES.getToken()`",
+          message: "Missing token.",
         },
         status: "error",
-        statusCode: 401,
       };
     }
 
     try {
+      const headers = new Headers();
+      headers.append("Content-Type", "application/json");
+      headers.append("Authorization", `Bearer ${this.token}`);
+
+      const requestOptions = {
+        body: JSON.stringify(query),
+        headers: headers,
+        method: "POST",
+      };
+
       const response = await retry(
         async (bail) => {
-          const headers = new Headers();
-          headers.append("Content-Type", "application/json");
-          headers.append("Authorization", `Bearer ${this.token}`);
-
-          const requestOptions = {
-            body: JSON.stringify(query),
-            headers: headers,
-            method: "POST",
-          };
-
           const response = await fetch(
             `${RUES.baseUrl}/api/ConsultasRUES/BusquedaAvanzadaRM`,
             requestOptions
@@ -228,38 +228,34 @@ export class RUES {
 
           const data = await response.json();
 
+          if (response.ok) {
+            return {
+              data: data as AdvancedSearchResponse,
+              status: "success",
+              statusCode: response.status,
+            } as const;
+          }
+
           if (response.status === 401) {
-            console.error(data);
-            bail(new Error("Unauthorized."));
-            // return;
+            bail(new HttpError(401, "Unauthorized"));
+          } else {
+            throw new HttpError(response.status, "Failed to fetch");
           }
-
-          if (!response.ok) {
-            console.error(data);
-            throw new Error(`Failed to fetch. Status code: ${response.status}`);
-          }
-
           return {
-            data: data as AdvancedSearchResponse,
-            status: "success",
+            data,
+            status: "error",
             statusCode: response.status,
           } as const;
         },
         {
           minTimeout,
-          onRetry: (error, attempt) => {
-            console.log(`Attempt ${attempt}: ${error}`);
-          },
+          onRetry,
           retries,
-          // maxTimeout
         }
       );
       return response;
     } catch (error) {
-      return {
-        data: error,
-        status: "error",
-      };
+      return failedRequestResponse(error);
     }
   }
 
@@ -387,4 +383,38 @@ export class RUES {
       };
     }
   }
+}
+
+function failedRequestResponse(error: unknown) {
+  if (error instanceof HttpError) {
+    return {
+      data: {
+        message: error.message,
+      },
+      status: "error",
+      statusCode: error.statusCode,
+    } as const;
+  }
+  if (error instanceof TypeError) {
+    return {
+      data: { message: error.message },
+      status: "error",
+    } as const;
+  }
+  return {
+    data: error,
+    status: "error",
+  } as const;
+}
+
+function onRetry(error: unknown, attempt: number) {
+  if (error instanceof HttpError) {
+    console.log(`Attempt ${attempt}: ${error.statusCode} ${error.message}`);
+    return;
+  }
+  if (error instanceof TypeError) {
+    console.log(`Attempt ${attempt}: ${error.message}`);
+    return;
+  }
+  console.log(`Attempt ${attempt}: ${error}`);
 }
