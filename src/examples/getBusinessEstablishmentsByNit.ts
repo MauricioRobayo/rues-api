@@ -7,5 +7,5 @@ if (tokenResponse.status === "error") {
 }
 const rues = new RUES(tokenResponse.data.token);
 
-const response = await rues.getBusinessEstablishmentsByNit(900122353);
+const response = await rues.getBusinessEstablishmentsByNit({ nit: 900122353 });
 console.dir(response, { depth: Infinity });
