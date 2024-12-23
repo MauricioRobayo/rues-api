@@ -210,7 +210,7 @@ export class RUES {
 
     try {
       const response = await retry(
-        async () => {
+        async (bail) => {
           const headers = new Headers();
           headers.append("Content-Type", "application/json");
           headers.append("Authorization", `Bearer ${this.token}`);
@@ -227,12 +227,16 @@ export class RUES {
           );
 
           const data = await response.json();
+
+          if (response.status === 401) {
+            console.error(data);
+            bail(new Error("Unauthorized."));
+            // return;
+          }
+
           if (!response.ok) {
-            return {
-              data,
-              status: "error",
-              statusCode: response.status,
-            } as const;
+            console.error(data);
+            throw new Error(`Failed to fetch. Status code: ${response.status}`);
           }
 
           return {

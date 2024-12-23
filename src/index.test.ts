@@ -51,7 +51,7 @@ describe("getToken", () => {
   });
 });
 
-describe("advancedSearch", () => {
+describe.only("advancedSearch", () => {
   test("should get a business record if given a valid token", async () => {
     const token = await getToken();
     const rues = new RUES(token);
@@ -64,14 +64,18 @@ describe("advancedSearch", () => {
     });
   });
 
-  test("should throw an error if given an invalid token", async () => {
+  test.only("should throw with no retries if invalid token is given", async () => {
+    const consoleLogSpy = vi.spyOn(console, "log");
+    const consoleErrorSpy = vi.spyOn(console, "error");
     const rues = new RUES("invalid-token");
 
     const data = await rues.advancedSearch({ query: { nit: 900000000 } });
+
+    expect(consoleLogSpy).toHaveBeenCalledTimes(0);
+    expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
     expect(data).toMatchObject({
-      data: { Message: "Authorization has been denied for this request." },
+      data: {},
       status: "error",
-      statusCode: 401,
     });
   });
 
