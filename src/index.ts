@@ -1,6 +1,6 @@
 import retry from "async-retry";
 
-import type {
+export type {
   AdvancedSearchResponse,
   BusinessEstablishmentsResponse,
   FileResponse,
