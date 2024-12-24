@@ -1,6 +1,8 @@
 import retry from "async-retry";
 
-export type {
+export type { BusinessRecord, File } from "./types";
+
+import type {
   AdvancedSearchResponse,
   BusinessEstablishmentsResponse,
   FileResponse,

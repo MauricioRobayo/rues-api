@@ -15,6 +15,22 @@ export interface BusinessEstablishmentsResponse {
   registros?: BusinessEstablishment[];
 }
 
+export interface BusinessRecord {
+  categoria: string;
+  cod_camara: string;
+  dv: string;
+  estado_matricula: string;
+  id_rm: string;
+  matricula: string;
+  nit: string;
+  nom_camara: string;
+  organizacion_juridica: string;
+  razon_social: string;
+  sigla: string;
+  tipo_documento: string;
+  ultimo_ano_renovado: string;
+}
+
 export interface File {
   camara: string;
   categoria_matricula: string;
@@ -103,20 +119,4 @@ interface BusinessEstablishment {
   RAZON_SOCIAL: string;
   SIGLA: string;
   ULTIMO_ANO_RENOVADO: number;
-}
-
-interface BusinessRecord {
-  categoria: string;
-  cod_camara: string;
-  dv: string;
-  estado_matricula: string;
-  id_rm: string;
-  matricula: string;
-  nit: string;
-  nom_camara: string;
-  organizacion_juridica: string;
-  razon_social: string;
-  sigla: string;
-  tipo_documento: string;
-  ultimo_ano_renovado: string;
 }
