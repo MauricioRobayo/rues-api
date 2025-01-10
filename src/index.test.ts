@@ -214,7 +214,7 @@ describe("getFile", () => {
   });
 });
 
-describe.skip("getEstablishments", () => {
+describe("getEstablishments", () => {
   test("should get business establishments given a business registration number and chamber code", async () => {
     const token = await getToken();
     const rues = new RUES(token);
@@ -237,7 +237,7 @@ describe.skip("getEstablishments", () => {
 
     const response = await rues.advancedSearch({ query: { nit: 900000000 } });
     expect(response).toMatchObject({
-      data: { Message: "Authorization has been denied for this request." },
+      data: { message: "Unauthorized" },
       status: "error",
       statusCode: 401,
     });

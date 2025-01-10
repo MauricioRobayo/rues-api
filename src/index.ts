@@ -221,7 +221,7 @@ export class RUES {
 
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
-    headers.append("Authorization", `Bearer ${this.token}`);
+    headers.append("Authorization", `Bearer ${token}`);
 
     const fetchRues = async (bail: (e: unknown) => void) => {
       const requestOptions = {
@@ -295,7 +295,7 @@ export class RUES {
         `${RUES.baseUrl}/api/PropietarioEstXCamaraYMatricula?${searchParams}`,
         {
           headers: {
-            authorization: `Bearer ${this.token}`,
+            authorization: `Bearer ${token}`,
             "content-type": "application/json",
           },
           method: "POST",
@@ -325,33 +325,6 @@ export class RUES {
     } catch (error) {
       return failedRequestResponse(error);
     }
-  }
-
-  async getBusinessEstablishmentsByNit({
-    nit,
-    retryOptions,
-  }: WithRetryOptions<{ nit: number }>) {
-    const response = await this.advancedSearch({
-      query: { nit },
-      retryOptions,
-    });
-    if (response.status === "error") {
-      return response;
-    }
-    const businessRegistrationId = response.data.registros?.at(0)?.id_rm;
-    if (!businessRegistrationId) {
-      throw new Error("NIT not found!");
-    }
-    const { businessRegistrationNumber, chamberCode } = RUES.getBusinessDetails(
-      businessRegistrationId
-    );
-    return this.getBusinessEstablishments({
-      query: {
-        businessRegistrationNumber,
-        chamberCode,
-      },
-      retryOptions,
-    });
   }
 
   async getFile({
