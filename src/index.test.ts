@@ -93,7 +93,7 @@ describe("getToken", () => {
 });
 
 describe("advancedSearch", () => {
-  test("get a business record if given a valid token", async () => {
+  test("get a business record if given a valid token in the constructor", async () => {
     const token = await getToken();
     const rues = new RUES(token);
     const response = await rues.advancedSearch({ query: { nit: 900000000 } });
@@ -105,6 +105,20 @@ describe("advancedSearch", () => {
     });
   });
 
+  test("get a business record if given a valid token", async () => {
+    const token = await getToken();
+    const rues = new RUES();
+    const response = await rues.advancedSearch({
+      query: { nit: 900000000 },
+      token,
+    });
+
+    expect(response).toMatchObject({
+      data: mockResponse,
+      status: "success",
+      statusCode: 200,
+    });
+  });
   test("no retries if invalid token is given", async () => {
     const consoleLogSpy = getConsoleLogSpy();
     const rues = new RUES("invalid-token");
@@ -215,7 +229,7 @@ describe("getFile", () => {
 });
 
 describe("getEstablishments", () => {
-  test("should get business establishments given a business registration number and chamber code", async () => {
+  test("should get business establishments with a valid token in the constructor", async () => {
     const token = await getToken();
     const rues = new RUES(token);
     const response = await rues.getBusinessEstablishments({
@@ -223,6 +237,24 @@ describe("getEstablishments", () => {
         businessRegistrationNumber: "123",
         chamberCode: "456",
       },
+    });
+
+    expect(response).toMatchObject({
+      data: mockResponse,
+      status: "success",
+      statusCode: 200,
+    });
+  });
+
+  test("should get business establishments with a valid token", async () => {
+    const token = await getToken();
+    const rues = new RUES();
+    const response = await rues.getBusinessEstablishments({
+      query: {
+        businessRegistrationNumber: "123",
+        chamberCode: "456",
+      },
+      token,
     });
 
     expect(response).toMatchObject({
