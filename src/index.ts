@@ -11,6 +11,12 @@ import type {
   WithRetryOptions,
 } from "./types";
 
+export type {
+  AdvancedSearchResponse,
+  BusinessEstablishmentsResponse,
+  FileResponse,
+} from "./types";
+
 import { HttpError } from "./httpError";
 
 const defaultRetryOptions: RetryOptions = {
