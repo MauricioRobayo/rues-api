@@ -6,6 +6,28 @@ export interface AdvancedSearchResponse {
   registros?: BusinessRecord[];
 }
 
+export interface BusinessEstablishment {
+  CATEGORIA_MATRICULA: string;
+  CODIGO_CAMARA: string;
+  CODIGO_CATEGORIA_MATRICULA: string;
+  CODIGO_CLASE_IDENTIFICACION: string;
+  CODIGO_ESTADO_MATRICULA: string;
+  CODIGO_ORGANIZACION_JURIDICA: string;
+  CODIGO_TIPO_SOCIEDAD: string;
+  DESC_CAMARA: string;
+  DESC_ESTADO_MATRICULA: "ACTIVA" | "CANCELADA";
+  DESC_ORGANIZACION_JURIDICA: string;
+  DESC_TIPO_SOCIEDAD: string;
+  DIGITO_VERIFICACION: string;
+  FECHA_MATRICULA: string;
+  FECHA_RENOVACION: string;
+  MATRICULA: string;
+  NUMERO_IDENTIFICACION: string;
+  RAZON_SOCIAL: string;
+  SIGLA: string;
+  ULTIMO_ANO_RENOVADO: number;
+}
+
 export interface BusinessEstablishmentsResponse {
   cant_Registros: number;
   code: string;
@@ -98,25 +120,3 @@ export type RuesResponse<T> = Promise<
 >;
 
 export type WithRetryOptions<T> = T & { retryOptions?: RetryOptions };
-
-interface BusinessEstablishment {
-  CATEGORIA_MATRICULA: string;
-  CODIGO_CAMARA: string;
-  CODIGO_CATEGORIA_MATRICULA: string;
-  CODIGO_CLASE_IDENTIFICACION: string;
-  CODIGO_ESTADO_MATRICULA: string;
-  CODIGO_ORGANIZACION_JURIDICA: string;
-  CODIGO_TIPO_SOCIEDAD: string;
-  DESC_CAMARA: string;
-  DESC_ESTADO_MATRICULA: "ACTIVA" | "CANCELADA";
-  DESC_ORGANIZACION_JURIDICA: string;
-  DESC_TIPO_SOCIEDAD: string;
-  DIGITO_VERIFICACION: string;
-  FECHA_MATRICULA: string;
-  FECHA_RENOVACION: string;
-  MATRICULA: string;
-  NUMERO_IDENTIFICACION: string;
-  RAZON_SOCIAL: string;
-  SIGLA: string;
-  ULTIMO_ANO_RENOVADO: number;
-}

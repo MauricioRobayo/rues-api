@@ -1,7 +1,5 @@
 import retry from "async-retry";
 
-export type { BusinessRecord, File } from "./types";
-
 import type {
   AdvancedSearchResponse,
   BusinessEstablishmentsResponse,
@@ -13,7 +11,10 @@ import type {
 
 export type {
   AdvancedSearchResponse,
+  BusinessEstablishment,
   BusinessEstablishmentsResponse,
+  BusinessRecord,
+  File,
   FileResponse,
 } from "./types";
 
