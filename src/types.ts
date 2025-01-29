@@ -250,10 +250,10 @@ export interface StoreFront {
   ano_renovado_anterior: string;
   barrio_comercial: string;
   barrio_fiscal: string;
-  ciiu1: string;
-  ciiu2: string;
-  ciiu3: string;
-  ciiu4: string;
+  ciiu1?: string;
+  ciiu2?: string;
+  ciiu3?: string;
+  ciiu4?: string;
   codigo_camara: string;
   codigo_categoria_matricula: string;
   codigo_estado_matricula: string;
@@ -265,9 +265,10 @@ export interface StoreFront {
   correo_electronico_comercial: string;
   correo_electronico_fiscal: string;
   desc_Act_Econ: string;
-  desc_ciiu1: string;
-  desc_ciiu2: string;
-  desc_ciiu3: string;
+  desc_ciiu1?: string;
+  desc_ciiu2?: string;
+  desc_ciiu3?: string;
+  desc_ciiu4?: string;
   direccion_comercial: string;
   direccion_fiscal: string;
   empleados: string;
