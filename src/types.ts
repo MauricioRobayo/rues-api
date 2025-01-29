@@ -109,14 +109,7 @@ export interface FileResponse {
   registros: File;
 }
 
-export interface RetryOptions {
-  minTimeout?: number;
-  retries?: number;
-}
-
 export type RuesResponse<T> = Promise<
   | { data: T; status: "success"; statusCode: number }
   | { data: unknown; status: "error"; statusCode?: number }
 >;
-
-export type WithRetryOptions<T> = T & { retryOptions?: RetryOptions };
