@@ -74,7 +74,7 @@ export interface CompanyRecord {
   codigo_organizacion_juridica: string;
   codigo_postal_comercial: string;
   codigo_postal_fiscal: string;
-  codigo_tamano_empresa: string;
+  codigo_tamano_empresa: "01" | "02" | "03" | "04";
   codigo_tipo_identificacion: string;
   codigo_tipo_sociedad: string;
   control_inactivacion_sipref: string;
