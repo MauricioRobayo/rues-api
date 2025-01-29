@@ -1,13 +1,14 @@
-import { RUES } from "..";
+import { advancedSearch, getToken } from "..";
 
-const tokenResponse = await RUES.getToken();
+const tokenResponse = await getToken();
 
 if (tokenResponse.status === "error") {
   console.error(tokenResponse);
   process.exit(1);
 }
 
-const rues = new RUES(tokenResponse.data.token);
-
-const response = await rues.advancedSearch({ query: { nit: 900122353 } });
+const response = await advancedSearch({
+  query: { nit: 900122353 },
+  token: tokenResponse.data.token,
+});
 console.dir(response, { depth: Infinity });

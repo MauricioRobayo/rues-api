@@ -2,6 +2,7 @@ import type {
   AdvancedSearchResponse,
   BusinessEstablishmentsResponse,
   FileResponse,
+  QueryNitResponse,
   RuesFetchOptions,
   RuesResponse,
 } from "./types";
@@ -59,7 +60,7 @@ export function getBusinessEstablishments({
   });
 }
 
-export async function getFile({ registrationId }: { registrationId: string }) {
+export async function getFile(registrationId: string) {
   return ruesApi<FileResponse>({
     method: "GET",
     path: `/WEB2/api/Expediente/DetalleRM/${registrationId}`,
@@ -94,13 +95,13 @@ export async function getToken(): RuesResponse<{ token: string }> {
 }
 
 export async function queryNit({ nit, token }: { nit: number; token: string }) {
-  return ruesApi({
+  return ruesApi<QueryNitResponse>({
     path: "/api/consultasRUES/ConsultaNIT",
     searchParams: new URLSearchParams({
       nit: String(nit),
-      token,
       usuario: "",
     }),
+    token,
   });
 }
 

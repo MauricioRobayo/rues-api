@@ -1,4 +1,4 @@
-import { getBusinessEstablishments, getToken } from "..";
+import { getToken, queryNit } from "..";
 
 const tokenResponse = await getToken();
 
@@ -7,11 +7,9 @@ if (tokenResponse.status === "error") {
   process.exit(1);
 }
 
-const response = await getBusinessEstablishments({
-  query: {
-    businessRegistrationNumber: "0001763070",
-    chamberCode: "04",
-  },
+const response = await queryNit({
+  nit: 900122353,
   token: tokenResponse.data.token,
 });
+
 console.dir(response, { depth: Infinity });
