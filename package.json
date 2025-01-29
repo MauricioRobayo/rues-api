@@ -1,6 +1,6 @@
 {
   "name": "@mauriciorobayo/rues-api",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "description": "RUES API wrapper",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
