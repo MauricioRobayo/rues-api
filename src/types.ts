@@ -61,10 +61,11 @@ export interface CompanyRecord {
   cantidad_mujeres_cargos_directivos: string;
   cantidad_mujeres_empleadas: string;
   categoria_matricula: string;
-  ciiu3: string;
+  ciiu3?: string;
+  ciiu4?: string;
   ciiu_mayores_ingresos: string;
   cod_ciiu_act_econ_pri: string;
-  cod_ciiu_act_econ_sec: string;
+  cod_ciiu_act_econ_sec?: string;
   codigo_camara: string;
   codigo_categoria_matricula: string;
   codigo_estado_matricula: string;
@@ -79,9 +80,10 @@ export interface CompanyRecord {
   control_inactivacion_sipref: string;
   correo_electronico_comercial: string;
   correo_electronico_fiscal: string;
-  desc_ciiu3: string;
+  desc_ciiu3?: string;
+  desc_ciiu4?: string;
   desc_ciiu_act_econ_pri: string;
-  desc_ciiu_act_econ_sec: string;
+  desc_ciiu_act_econ_sec?: string;
   digito_verificacion: string;
   direccion_comercial: string;
   direccion_fiscal: string;
