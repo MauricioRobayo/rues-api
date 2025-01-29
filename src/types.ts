@@ -36,7 +36,6 @@ export interface BusinessEstablishmentsResponse {
   message: string;
   registros?: BusinessEstablishment[];
 }
-
 export interface BusinessRecord {
   categoria: string;
   cod_camara: string;
@@ -88,6 +87,7 @@ export interface CompanyRecord {
   direccion_fiscal: string;
   dpto_comercial: string;
   dpto_fiscal: string;
+  establecimientos: StoreFront[];
   estado_matricula: string;
   extincion_dominio: string;
   fecha_actualizacion_rues: string;
@@ -95,6 +95,12 @@ export interface CompanyRecord {
   fecha_matricula: string;
   fecha_renovacion: string;
   genero: string;
+  HistoricoCambiosNombre: {
+    codigo_camara: string;
+    fecha_cambio: string;
+    matricula: string;
+    razon_social_anterior: string;
+  };
   indicador_emprendimiento_social: string;
   indicador_inhabilidad_RUP: string;
   informacionCapitales: EquityInformation[];
@@ -123,6 +129,7 @@ export interface CompanyRecord {
   zona_comercial: string;
   zona_fiscal: string;
 }
+
 export interface EquityInformation {
   capital_autorizado: string;
   capital_pagado: string;
@@ -136,7 +143,6 @@ export interface EquityInformation {
   fecha_modificacion_capital: string;
   patrimonio_esal?: string;
 }
-
 export interface File {
   camara: string;
   categoria_matricula: string;
@@ -236,6 +242,52 @@ export type RuesResponse<T> = Promise<
   | { data: T; status: "success"; statusCode: number }
   | { error: unknown; status: "error"; statusCode?: number }
 >;
+
+export interface StoreFront {
+  afiliado: string;
+  ano_renovado_anterior: string;
+  barrio_comercial: string;
+  barrio_fiscal: string;
+  ciiu1: string;
+  ciiu2: string;
+  ciiu3: string;
+  ciiu4: string;
+  codigo_camara: string;
+  codigo_categoria_matricula: string;
+  codigo_estado_matricula: string;
+  codigo_organizacion_juridica: string;
+  codigo_postal_comercial: string;
+  codigo_postal_fiscal: string;
+  codigo_tipo_local: string;
+  codigo_ubicacion_empresa: string;
+  correo_electronico_comercial: string;
+  correo_electronico_fiscal: string;
+  desc_Act_Econ: string;
+  desc_ciiu1: string;
+  desc_ciiu2: string;
+  desc_ciiu3: string;
+  direccion_comercial: string;
+  direccion_fiscal: string;
+  empleados: string;
+  fecha_cancelacion: string;
+  fecha_matricula: string;
+  fecha_renovacion: string;
+  fecha_renovacion_anterior: string;
+  matricula: string;
+  municipio_comercial: string;
+  municipio_fiscal: string;
+  razon_social: string;
+  shd1: string;
+  shd2: string;
+  shd3: string;
+  shd4: string;
+  telefono_comercial_1: string;
+  telefono_comercial_2: string;
+  telefono_comercial_3: string;
+  tipo_propietario: string;
+  ultimo_ano_renovado: string;
+  valor_est_ag_suc: string;
+}
 
 export interface Vinculo {
   clase_identificacion: string;
