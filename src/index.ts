@@ -12,6 +12,7 @@ export type {
   BusinessEstablishment,
   BusinessEstablishmentsResponse,
   BusinessRecord,
+  CompanyRecord,
   File,
   FileResponse,
 } from "./types";
