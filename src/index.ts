@@ -15,6 +15,7 @@ export type {
   CompanyRecord,
   File,
   FileResponse,
+  StoreFront,
 } from "./types";
 
 const baseUrl = "https://ruesapi.rues.org.co";
