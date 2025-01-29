@@ -53,6 +53,90 @@ export interface BusinessRecord {
   ultimo_ano_renovado: string;
 }
 
+export interface CompanyRecord {
+  autorizacion_envio_correo_electronico: string;
+  barrio_comercial?: string;
+  barrio_fiscal?: string;
+  camara: string;
+  cantidad_establecimientos: string;
+  cantidad_mujeres_cargos_directivos: string;
+  cantidad_mujeres_empleadas: string;
+  categoria_matricula: string;
+  ciiu3: string;
+  ciiu_mayores_ingresos: string;
+  cod_ciiu_act_econ_pri: string;
+  cod_ciiu_act_econ_sec: string;
+  codigo_camara: string;
+  codigo_categoria_matricula: string;
+  codigo_estado_matricula: string;
+  codigo_municipio_comercial: string;
+  codigo_municipio_fiscal: string;
+  codigo_organizacion_juridica: string;
+  codigo_postal_comercial: string;
+  codigo_postal_fiscal: string;
+  codigo_tamano_empresa: string;
+  codigo_tipo_identificacion: string;
+  codigo_tipo_sociedad: string;
+  control_inactivacion_sipref: string;
+  correo_electronico_comercial: string;
+  correo_electronico_fiscal: string;
+  desc_ciiu3: string;
+  desc_ciiu_act_econ_pri: string;
+  desc_ciiu_act_econ_sec: string;
+  digito_verificacion: string;
+  direccion_comercial: string;
+  direccion_fiscal: string;
+  dpto_comercial: string;
+  dpto_fiscal: string;
+  estado_matricula: string;
+  extincion_dominio: string;
+  fecha_actualizacion_rues: string;
+  fecha_cancelacion: string;
+  fecha_matricula: string;
+  fecha_renovacion: string;
+  genero: string;
+  indicador_emprendimiento_social: string;
+  indicador_inhabilidad_RUP: string;
+  informacionCapitales: EquityInformation[];
+  informacionFinanciera: financialInformation[];
+  inscripcion_proponente: string;
+  matricula: string;
+  multas: unknown[];
+  municipio_comercial: string;
+  municipio_fiscal: string;
+  numero_empleados: string;
+  numero_identificacion: string;
+  objeto_social: string;
+  organizacion_juridica: string;
+  razon_social: string;
+  sanciones: unknown[];
+  sede_administrativa?: string;
+  telefono_comercial_1: string;
+  telefono_comercial_2?: string;
+  telefono_fiscal_1: string;
+  telefono_fiscal_2?: string;
+  tipo_identificacion: string;
+  tipo_sociedad: string;
+  ubicacion_empresa?: string;
+  ultimo_ano_renovado: string;
+  vinculos: Vinculo[];
+  zona_comercial: string;
+  zona_fiscal: string;
+}
+export interface EquityInformation {
+  capital_autorizado: string;
+  capital_pagado: string;
+  capital_social: string;
+  capital_suscrito: string;
+  eat_aportes_activos?: string;
+  eat_aportes_en_dinero?: string;
+  eat_aportes_laborales?: string;
+  eat_aportes_laborales_adicionales?: string;
+  eat_total_aportes?: string;
+  fecha_modificacion_capital: string;
+  patrimonio_esal?: string;
+}
+
 export interface File {
   camara: string;
   categoria_matricula: string;
@@ -100,6 +184,7 @@ export interface File {
   ultimo_ano_renovado: string;
   url_venta_certificados: string;
 }
+
 export interface FileResponse {
   codigo_error: string;
   fecha_respuesta: Date;
@@ -108,21 +193,7 @@ export interface FileResponse {
   registros: File;
 }
 
-export interface InformacionCapitale {
-  capital_autorizado: string;
-  capital_pagado: string;
-  capital_social: string;
-  capital_suscrito: string;
-  eat_aportes_activos?: string;
-  eat_aportes_en_dinero?: string;
-  eat_aportes_laborales?: string;
-  eat_aportes_laborales_adicionales?: string;
-  eat_total_aportes?: string;
-  fecha_modificacion_capital: string;
-  patrimonio_esal?: string;
-}
-
-export interface InformacionFinanciera {
+export interface financialInformation {
   activo_corriente: string;
   activo_no_corriente: string;
   activo_total: string;
@@ -150,78 +221,7 @@ export interface QueryNitResponse {
   fecha_respuesta: string;
   hora_respuesta: string;
   nit: string;
-  registros: Record[];
-}
-
-export interface Record {
-  autorizacion_envio_correo_electronico: string;
-  barrio_comercial?: string;
-  barrio_fiscal?: string;
-  camara: string;
-  cantidad_establecimientos: string;
-  cantidad_mujeres_cargos_directivos: string;
-  cantidad_mujeres_empleadas: string;
-  categoria_matricula: string;
-  ciiu3: string;
-  ciiu_mayores_ingresos: string;
-  cod_ciiu_act_econ_pri: string;
-  cod_ciiu_act_econ_sec: string;
-  codigo_camara: string;
-  codigo_categoria_matricula: string;
-  codigo_estado_matricula: string;
-  codigo_municipio_comercial: string;
-  codigo_municipio_fiscal: string;
-  codigo_organizacion_juridica: string;
-  codigo_postal_comercial: string;
-  codigo_postal_fiscal: string;
-  codigo_tamano_empresa: string;
-  codigo_tipo_identificacion: string;
-  codigo_tipo_sociedad: string;
-  control_inactivacion_sipref: string;
-  correo_electronico_comercial: string;
-  correo_electronico_fiscal: string;
-  desc_ciiu3: string;
-  desc_ciiu_act_econ_pri: string;
-  desc_ciiu_act_econ_sec: string;
-  digito_verificacion: string;
-  direccion_comercial: string;
-  direccion_fiscal: string;
-  dpto_comercial: string;
-  dpto_fiscal: string;
-  estado_matricula: string;
-  extincion_dominio: string;
-  fecha_actualizacion_rues: string;
-  fecha_cancelacion: string;
-  fecha_matricula: string;
-  fecha_renovacion: string;
-  genero: string;
-  indicador_emprendimiento_social: string;
-  indicador_inhabilidad_RUP: string;
-  informacionCapitales: InformacionCapitale[];
-  informacionFinanciera: InformacionFinanciera[];
-  inscripcion_proponente: string;
-  matricula: string;
-  multas: any[];
-  municipio_comercial: string;
-  municipio_fiscal: string;
-  numero_empleados: string;
-  numero_identificacion: string;
-  objeto_social: string;
-  organizacion_juridica: string;
-  razon_social: string;
-  sanciones: any[];
-  sede_administrativa?: string;
-  telefono_comercial_1: string;
-  telefono_comercial_2?: string;
-  telefono_fiscal_1: string;
-  telefono_fiscal_2?: string;
-  tipo_identificacion: string;
-  tipo_sociedad: string;
-  ubicacion_empresa?: string;
-  ultimo_ano_renovado: string;
-  vinculos: Vinculo[];
-  zona_comercial: string;
-  zona_fiscal: string;
+  registros: CompanyRecord[];
 }
 
 export type RuesFetchOptions = {
