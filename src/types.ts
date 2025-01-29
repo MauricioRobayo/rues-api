@@ -114,7 +114,7 @@ export interface CompanyRecord {
   municipio_fiscal: string;
   numero_empleados: string;
   numero_identificacion: string;
-  objeto_social: string;
+  objeto_social?: string;
   organizacion_juridica: string;
   razon_social: string;
   sanciones: unknown[];
