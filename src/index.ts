@@ -2,6 +2,7 @@ import type {
   AdvancedSearchResponse,
   BusinessEstablishmentsResponse,
   FileResponse,
+  RuesFetchOptions,
   RuesResponse,
 } from "./types";
 
@@ -14,55 +15,20 @@ export type {
   FileResponse,
 } from "./types";
 
-import { HttpError } from "./httpError";
-
 const baseUrl = "https://ruesapi.rues.org.co";
 
-export async function advancedSearch({
+export function advancedSearch({
   query,
   token,
 }: {
   query: { matricula: string } | { nit: number } | { razon: string };
   token: string;
-}): RuesResponse<AdvancedSearchResponse> {
-  const headers = new Headers();
-  headers.append("Content-Type", "application/json");
-  headers.append("Authorization", `Bearer ${token}`);
-
-  const requestOptions = {
-    body: JSON.stringify(query),
-    headers: headers,
-    method: "POST",
-  };
-
-  try {
-    const response = await fetch(
-      `${baseUrl}/api/ConsultasRUES/BusquedaAvanzadaRM`,
-      requestOptions
-    );
-
-    const data = await response.json();
-
-    if (response.ok) {
-      return {
-        data: data as AdvancedSearchResponse,
-        status: "success",
-        statusCode: response.status,
-      } as const;
-    }
-
-    if (!response.ok) {
-      throw new HttpError(response.status, "Failed to fetch");
-    }
-
-    return {
-      data,
-      status: "error",
-      statusCode: response.status,
-    } as const;
-  } catch (error) {
-    return failedRequestResponse(error);
-  }
+}) {
+  return ruesApi<AdvancedSearchResponse>({
+    body: query,
+    path: "/api/ConsultasRUES/BusquedaAvanzadaRM",
+    token,
+  });
 }
 
 export function getBusinessDetails(businessRegistrationId: string) {
@@ -76,83 +42,40 @@ export function getBusinessDetails(businessRegistrationId: string) {
   };
 }
 
-export async function getBusinessEstablishments({
+export function getBusinessEstablishments({
   query,
   token,
 }: {
   query: { businessRegistrationNumber: string; chamberCode: string };
   token: string;
-}): RuesResponse<BusinessEstablishmentsResponse> {
-  const searchParams = new URLSearchParams({
-    codigo_camara: query.chamberCode,
-    matricula: query.businessRegistrationNumber,
+}) {
+  return ruesApi<BusinessEstablishmentsResponse>({
+    path: "/api/PropietarioEstXCamaraYMatricula",
+    searchParams: new URLSearchParams({
+      codigo_camara: query.chamberCode,
+      matricula: query.businessRegistrationNumber,
+    }),
+    token,
   });
-  try {
-    const response = await fetch(
-      `${baseUrl}/api/PropietarioEstXCamaraYMatricula?${searchParams}`,
-      {
-        headers: {
-          authorization: `Bearer ${token}`,
-          "content-type": "application/json",
-        },
-        method: "POST",
-      }
-    );
-    const data = await response.json();
-    if (!response.ok) {
-      return {
-        data,
-        status: "error",
-        statusCode: response.status,
-      } as const;
-    }
-    return {
-      data: data as BusinessEstablishmentsResponse,
-      status: "success",
-      statusCode: response.status,
-    } as const;
-  } catch (error) {
-    return failedRequestResponse(error);
-  }
 }
 
-export async function getFile({
-  id,
-}: {
-  id: string;
-}): RuesResponse<FileResponse> {
-  try {
-    const response = await fetch(
-      `${baseUrl}/WEB2/api/Expediente/DetalleRM/${id}`
-    );
-
-    const data = await response.json();
-    if (!response.ok) {
-      throw new HttpError(response.status, "Failed to fetch");
-    }
-    return {
-      data: data as FileResponse,
-      status: "success",
-      statusCode: response.status,
-    } as const;
-  } catch (error) {
-    return failedRequestResponse(error);
-  }
+export async function getFile({ registrationId }: { registrationId: string }) {
+  return ruesApi<FileResponse>({
+    method: "GET",
+    path: `/WEB2/api/Expediente/DetalleRM/${registrationId}`,
+  });
 }
 
 export async function getToken(): RuesResponse<{ token: string }> {
   try {
-    const response = await fetch(`${baseUrl}/WEB2/api/Token/ObtenerToken`, {
-      method: "POST",
+    const response = await ruesFetch({
+      path: "/WEB2/api/Token/ObtenerToken",
     });
-    if (!response.ok) {
-      throw new HttpError(response.status, "Failed to fetch");
-    }
-    const token = response.headers.get("tokenRuesAPI");
     const data = await response.json();
-    if (!token) {
+    const token = response.headers.get("tokenRuesAPI");
+    if (!token || !response.ok) {
       return {
-        data,
+        error: data,
         status: "error",
         statusCode: response.status,
       } as const;
@@ -163,28 +86,67 @@ export async function getToken(): RuesResponse<{ token: string }> {
       statusCode: response.status,
     } as const;
   } catch (error) {
-    return failedRequestResponse(error);
+    return {
+      error,
+      status: "error",
+    } as const;
   }
 }
 
-function failedRequestResponse(error: unknown) {
-  if (error instanceof HttpError) {
+export async function queryNit({ nit, token }: { nit: number; token: string }) {
+  return ruesApi({
+    path: "/api/consultasRUES/ConsultaNIT",
+    searchParams: new URLSearchParams({
+      nit: String(nit),
+      token,
+      usuario: "",
+    }),
+  });
+}
+
+async function ruesApi<T>(options: RuesFetchOptions): RuesResponse<T> {
+  try {
+    const response = await ruesFetch(options);
+    const data = await response.json();
+    if (!response.ok) {
+      return {
+        error: data,
+        status: "error",
+        statusCode: response.status,
+      } as const;
+    }
     return {
-      data: {
-        message: error.message,
-      },
+      data: data as T,
+      status: "success",
+      statusCode: response.status,
+    };
+  } catch (error) {
+    return {
+      error,
       status: "error",
-      statusCode: error.statusCode,
     } as const;
   }
-  if (error instanceof TypeError) {
-    return {
-      data: { message: error.message },
-      status: "error",
-    } as const;
+}
+
+async function ruesFetch({
+  body,
+  method = "POST",
+  path,
+  searchParams,
+  token,
+}: RuesFetchOptions) {
+  const headers = new Headers();
+  headers.append("Content-Type", "application/json");
+  if (token) {
+    headers.append("Authorization", `Bearer ${token}`);
   }
-  return {
-    data: error,
-    status: "error",
-  } as const;
+  const url = new URL(path, baseUrl);
+  if (searchParams) {
+    url.search = searchParams.toString();
+  }
+  return fetch(url, {
+    body: body ? JSON.stringify(body) : undefined,
+    headers,
+    method,
+  });
 }

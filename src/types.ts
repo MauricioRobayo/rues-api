@@ -109,7 +109,15 @@ export interface FileResponse {
   registros: File;
 }
 
+export type RuesFetchOptions = {
+  body?: Record<string, unknown>;
+  method?: "GET" | "POST";
+  path: string;
+  searchParams?: URLSearchParams;
+  token?: string;
+};
+
 export type RuesResponse<T> = Promise<
   | { data: T; status: "success"; statusCode: number }
-  | { data: unknown; status: "error"; statusCode?: number }
+  | { error: unknown; status: "error"; statusCode?: number }
 >;
