@@ -67,7 +67,7 @@ export async function getFile(registrationId: string) {
   });
 }
 
-export async function getToken(): RuesResponse<{ token: string }> {
+export async function getToken() {
   try {
     const response = await ruesFetch({
       path: "/WEB2/api/Token/ObtenerToken",
@@ -120,7 +120,7 @@ async function ruesApi<T>(options: RuesFetchOptions): RuesResponse<T> {
       data: data as T,
       status: "success",
       statusCode: response.status,
-    };
+    } as const;
   } catch (error) {
     return {
       error,
