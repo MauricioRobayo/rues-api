@@ -89,7 +89,7 @@ export interface CompanyRecord {
   direccion_fiscal: string;
   dpto_comercial: string;
   dpto_fiscal: string;
-  establecimientos: StoreFront[];
+  establecimientos?: StoreFront[];
   estado_matricula: string;
   extincion_dominio: string;
   fecha_actualizacion_rues: string;
