@@ -119,6 +119,7 @@ export interface CompanyRecord {
   razon_social: string;
   sanciones: unknown[];
   sede_administrativa?: string;
+  sigla?: string;
   telefono_comercial_1: string;
   telefono_comercial_2?: string;
   telefono_fiscal_1: string;
