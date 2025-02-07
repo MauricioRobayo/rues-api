@@ -69,6 +69,23 @@ export async function getFile(registrationId: string) {
   });
 }
 
+export function getLegalRepresentativePowers({
+  query,
+  token,
+}: {
+  query: { businessRegistrationNumber: string; chamberCode: string };
+  token: string;
+}) {
+  return ruesApi<string>({
+    path: "/api/ConsultFacultadesXCamYMatricula",
+    searchParams: new URLSearchParams({
+      codigo_camara: query.chamberCode,
+      matricula: query.businessRegistrationNumber,
+    }),
+    token,
+  });
+}
+
 export async function getToken() {
   try {
     const response = await ruesFetch({
