@@ -128,7 +128,7 @@ export interface CompanyRecord {
   tipo_sociedad: string;
   ubicacion_empresa?: string;
   ultimo_ano_renovado: string;
-  vinculos: Vinculo[];
+  vinculos?: Vinculo[];
   zona_comercial: string;
   zona_fiscal: string;
 }
