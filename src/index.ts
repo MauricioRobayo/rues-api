@@ -142,7 +142,12 @@ async function ruesApi<T>(options: RuesFetchOptions): RuesResponse<T> {
         statusCode: response.status,
       } as const;
     }
-    if (typeof data === "object" && data !== null && "error" in data) {
+    if (
+      typeof data === "object" &&
+      data !== null &&
+      "error" in data &&
+      Number(data.error.code) !== 0
+    ) {
       return {
         error: data.error.message,
         status: "error",
