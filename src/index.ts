@@ -127,13 +127,27 @@ export async function queryNit({ nit, token }: { nit: number; token: string }) {
 async function ruesApi<T>(options: RuesFetchOptions): RuesResponse<T> {
   try {
     const response = await ruesFetch(options);
-    const data = await response.json();
+    const data = (await response.json()) as
+      | T
+      | {
+          error: {
+            code: string;
+            message: string;
+          };
+        };
     if (!response.ok) {
       return {
         error: data,
         status: "error",
         statusCode: response.status,
       } as const;
+    }
+    if (typeof data === "object" && data !== null && "error" in data) {
+      return {
+        error: data.error.message,
+        status: "error",
+        statusCode: Number(data.error.code),
+      };
     }
     return {
       data: data as T,
