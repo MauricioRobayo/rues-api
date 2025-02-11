@@ -52,6 +52,20 @@ export interface BusinessRecord {
   ultimo_ano_renovado: string;
 }
 
+export interface CapitalInformation {
+  capital_autorizado: string;
+  capital_pagado: string;
+  capital_social: string;
+  capital_suscrito: string;
+  eat_aportes_activos?: string;
+  eat_aportes_en_dinero?: string;
+  eat_aportes_laborales?: string;
+  eat_aportes_laborales_adicionales?: string;
+  eat_total_aportes?: string;
+  fecha_modificacion_capital: string;
+  patrimonio_esal?: string;
+}
+
 export interface CompanyRecord {
   autorizacion_envio_correo_electronico: string;
   barrio_comercial?: string;
@@ -105,8 +119,8 @@ export interface CompanyRecord {
   };
   indicador_emprendimiento_social: string;
   indicador_inhabilidad_RUP: string;
-  informacionCapitales: EquityInformation[];
-  informacionFinanciera: financialInformation[];
+  informacionCapitales: CapitalInformation[];
+  informacionFinanciera: FinancialInformation[];
   inscripcion_proponente: string;
   matricula: string;
   multas: unknown[];
@@ -131,20 +145,6 @@ export interface CompanyRecord {
   vinculos?: Vinculo[];
   zona_comercial: string;
   zona_fiscal: string;
-}
-
-export interface EquityInformation {
-  capital_autorizado: string;
-  capital_pagado: string;
-  capital_social: string;
-  capital_suscrito: string;
-  eat_aportes_activos?: string;
-  eat_aportes_en_dinero?: string;
-  eat_aportes_laborales?: string;
-  eat_aportes_laborales_adicionales?: string;
-  eat_total_aportes?: string;
-  fecha_modificacion_capital: string;
-  patrimonio_esal?: string;
 }
 export interface File {
   camara: string;
@@ -202,24 +202,25 @@ export interface FileResponse {
   registros: File;
 }
 
-export interface financialInformation {
+export interface FinancialInformation {
   activo_corriente: string;
-  activo_no_corriente: string;
+  activo_no_corriente?: string;
   activo_total: string;
   ano_informacion_financiera: string;
+  balance_social?: string;
   capital_social_extranjero_privado: string;
   capital_social_extranjero_publico: string;
   capital_social_nacional_privado: string;
   capital_social_nacional_publico: string;
   costo_ventas: string;
-  gastos_impuestos: string;
+  gastos_impuestos?: string;
   gastos_operacionales: string;
   ingresos_actividad_ordinaria: string;
   otros_gastos: string;
   otros_ingresos: string;
   pasivo_corriente: string;
   pasivo_mas_patrimonio?: string;
-  pasivo_no_corriente: string;
+  pasivo_no_corriente?: string;
   pasivo_total: string;
   patrimonio_neto: string;
   resultado_del_periodo: string;
