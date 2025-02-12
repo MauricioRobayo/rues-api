@@ -119,8 +119,8 @@ export interface CompanyRecord {
   };
   indicador_emprendimiento_social: string;
   indicador_inhabilidad_RUP: string;
-  informacionCapitales: CapitalInformation[];
-  informacionFinanciera: FinancialInformation[];
+  informacionCapitales?: CapitalInformation[];
+  informacionFinanciera?: FinancialInformation[];
   inscripcion_proponente: string;
   matricula: string;
   multas: unknown[];
