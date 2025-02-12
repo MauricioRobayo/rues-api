@@ -296,30 +296,30 @@ export interface StoreFront {
 }
 
 export interface TourismRegistry {
-  RNT: string;
-  RNT_categoria: string;
-  RNT_correo_electronico: string;
-  RNT_correo_electronico_prestador: string;
-  RNT_departamento: string;
-  RNT_direccion_comercial: string;
-  RNT_direccion_notificacion: string;
-  RNT_dpto_notificacion: string;
-  RNT_dv_prestador: string;
-  RNT_empleados: string;
-  RNT_estado: string;
-  RNT_identificacion_representante_legal: string;
-  RNT_municipio: string;
-  RNT_municipio_notificacion: string;
-  RNT_nit_prestador: string;
-  RNT_razon_social: string;
-  RNT_razon_social_prestador: string;
-  RNT_representante_legal: string;
-  RNT_subCategoria: string;
-  RNT_telefono_celular: string;
-  RNT_telefono_fijo: string;
-  RNT_telefono_notificaciones: string;
-  RNT_telefono_prestador: string;
-  RNT_ultimo_ano_actualizado: string;
+  RNT?: string;
+  RNT_categoria?: string;
+  RNT_correo_electronico?: string;
+  RNT_correo_electronico_prestador?: string;
+  RNT_departamento?: string;
+  RNT_direccion_comercial?: string;
+  RNT_direccion_notificacion?: string;
+  RNT_dpto_notificacion?: string;
+  RNT_dv_prestador?: string;
+  RNT_empleados?: string;
+  RNT_estado?: string;
+  RNT_identificacion_representante_legal?: string;
+  RNT_municipio?: string;
+  RNT_municipio_notificacion?: string;
+  RNT_nit_prestador?: string;
+  RNT_razon_social?: string;
+  RNT_razon_social_prestador?: string;
+  RNT_representante_legal?: string;
+  RNT_subCategoria?: string;
+  RNT_telefono_celular?: string;
+  RNT_telefono_fijo?: string;
+  RNT_telefono_notificaciones?: string;
+  RNT_telefono_prestador?: string;
+  RNT_ultimo_ano_actualizado?: string;
 }
 
 export interface Vinculo {
