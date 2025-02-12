@@ -16,6 +16,7 @@ export type {
   File,
   FileResponse,
   StoreFront,
+  TourismRegistry,
 } from "./types";
 
 const baseUrl = "https://ruesapi.rues.org.co";

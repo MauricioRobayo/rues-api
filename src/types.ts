@@ -103,7 +103,7 @@ export interface CompanyRecord {
   direccion_fiscal: string;
   dpto_comercial: string;
   dpto_fiscal: string;
-  establecimientos?: (StoreFront | { rnt: RNT[] })[];
+  establecimientos?: (StoreFront | { rnt: TourismRegistry[] })[];
   estado_matricula: string;
   extincion_dominio: string;
   fecha_actualizacion_rues: string;
@@ -234,7 +234,7 @@ export interface QueryNitResponse {
   registros: CompanyRecord[];
 }
 
-export interface RNT {
+export interface TourismRegistry {
   RNT: string;
   RNT_categoria: string;
   RNT_correo_electronico: string;
