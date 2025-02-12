@@ -103,7 +103,7 @@ export interface CompanyRecord {
   direccion_fiscal: string;
   dpto_comercial: string;
   dpto_fiscal: string;
-  establecimientos?: StoreFront[];
+  establecimientos?: (StoreFront | { rnt: RNT[] })[];
   estado_matricula: string;
   extincion_dominio: string;
   fecha_actualizacion_rues: string;
@@ -232,6 +232,33 @@ export interface QueryNitResponse {
   hora_respuesta: string;
   nit: string;
   registros: CompanyRecord[];
+}
+
+export interface RNT {
+  RNT: string;
+  RNT_categoria: string;
+  RNT_correo_electronico: string;
+  RNT_correo_electronico_prestador: string;
+  RNT_departamento: string;
+  RNT_direccion_comercial: string;
+  RNT_direccion_notificacion: string;
+  RNT_dpto_notificacion: string;
+  RNT_dv_prestador: string;
+  RNT_empleados: string;
+  RNT_estado: string;
+  RNT_identificacion_representante_legal: string;
+  RNT_municipio: string;
+  RNT_municipio_notificacion: string;
+  RNT_nit_prestador: string;
+  RNT_razon_social: string;
+  RNT_razon_social_prestador: string;
+  RNT_representante_legal: string;
+  RNT_subCategoria: string;
+  RNT_telefono_celular: string;
+  RNT_telefono_fijo: string;
+  RNT_telefono_notificaciones: string;
+  RNT_telefono_prestador: string;
+  RNT_ultimo_ano_actualizado: string;
 }
 
 export type RuesFetchOptions = {
