@@ -304,7 +304,7 @@ export interface TourismRegistry {
   RNT_direccion_comercial?: string;
   RNT_direccion_notificacion?: string;
   RNT_dpto_notificacion?: string;
-  RNT_dv_prestador?: string;
+  RNT_dv_prestador: string;
   RNT_empleados?: string;
   RNT_estado: string;
   RNT_identificacion_representante_legal?: string;
