@@ -25,7 +25,10 @@ export function advancedSearch({
   query,
   token,
 }: {
-  query: { matricula: string } | { nit: number } | { razon: string };
+  query:
+    | { cod_camara?: number; matricula: string }
+    | { cod_camara?: number; nit: number }
+    | { cod_camara?: number; razon: string };
   token: string;
 }) {
   return ruesApi<AdvancedSearchResponse>({
