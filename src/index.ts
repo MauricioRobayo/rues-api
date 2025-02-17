@@ -44,9 +44,9 @@ export function advancedSearch({
   });
 }
 
-export function getBusinessDetails(businessRegistrationId: string) {
-  const businessRegistrationNumber = businessRegistrationId.slice(-10);
-  const chamberCode = businessRegistrationId
+export function getBusinessDetails(registrationId: string) {
+  const businessRegistrationNumber = registrationId.slice(-10);
+  const chamberCode = registrationId
     .replace(businessRegistrationNumber, "")
     .padStart(2, "0");
   return {
@@ -92,14 +92,14 @@ export function getLegalRepresentativePowers({
   signal,
   token,
 }: WithOptions<{
-  query: { businessRegistrationNumber: string; chamberCode: string };
+  query: { chamberCode: string; registrationNumber: string };
   token: string;
 }>) {
   return ruesApi<string>({
     path: "/api/ConsultFacultadesXCamYMatricula",
     searchParams: new URLSearchParams({
       codigo_camara: query.chamberCode,
-      matricula: query.businessRegistrationNumber,
+      matricula: query.registrationNumber,
     }),
     signal,
     token,

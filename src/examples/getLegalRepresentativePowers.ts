@@ -9,7 +9,7 @@ if (tokenResponse.status === "error") {
 
 const response = await getLegalRepresentativePowers({
   query: {
-    businessRegistrationNumber: "0001763070",
+    registrationNumber: "0001763070",
     chamberCode: "04",
   },
   token: tokenResponse.data.token,
