@@ -21,18 +21,21 @@ export type {
 
 const baseUrl = "https://ruesapi.rues.org.co";
 
+type WithOptions<T = unknown> = T & {
+  signal?: AbortSignal;
+};
+
 export function advancedSearch({
   query,
   signal,
   token,
-}: {
+}: WithOptions<{
   query:
     | { cod_camara?: string; matricula: string }
     | { cod_camara?: string; nit: number }
     | { cod_camara?: string; razon: string };
-  signal?: AbortSignal;
   token: string;
-}) {
+}>) {
   return ruesApi<AdvancedSearchResponse>({
     body: query,
     path: "/api/ConsultasRUES/BusquedaAvanzadaRM",
@@ -56,11 +59,10 @@ export function getBusinessEstablishments({
   query,
   signal,
   token,
-}: {
+}: WithOptions<{
   query: { businessRegistrationNumber: string; chamberCode: string };
-  signal?: AbortSignal;
   token: string;
-}) {
+}>) {
   return ruesApi<BusinessEstablishmentsResponse>({
     path: "/api/PropietarioEstXCamaraYMatricula",
     searchParams: new URLSearchParams({
@@ -75,10 +77,9 @@ export function getBusinessEstablishments({
 export async function getFile({
   registrationId,
   signal,
-}: {
+}: WithOptions<{
   registrationId: string;
-  signal?: AbortSignal;
-}) {
+}>) {
   return ruesApi<FileResponse>({
     method: "GET",
     path: `/WEB2/api/Expediente/DetalleRM/${registrationId}`,
@@ -90,11 +91,10 @@ export function getLegalRepresentativePowers({
   query,
   signal,
   token,
-}: {
+}: WithOptions<{
   query: { businessRegistrationNumber: string; chamberCode: string };
-  signal?: AbortSignal;
   token: string;
-}) {
+}>) {
   return ruesApi<string>({
     path: "/api/ConsultFacultadesXCamYMatricula",
     searchParams: new URLSearchParams({
@@ -106,7 +106,7 @@ export function getLegalRepresentativePowers({
   });
 }
 
-export async function getToken({ signal }: { signal?: AbortSignal } = {}) {
+export async function getToken({ signal }: WithOptions = {}) {
   try {
     const response = await ruesFetch({
       path: "/WEB2/api/Token/ObtenerToken",
@@ -138,11 +138,10 @@ export async function queryNit({
   nit,
   signal,
   token,
-}: {
+}: WithOptions<{
   nit: number;
-  signal?: AbortSignal;
   token: string;
-}) {
+}>) {
   return ruesApi<QueryNitResponse>({
     path: "/api/consultasRUES/ConsultaNIT",
     searchParams: new URLSearchParams({
