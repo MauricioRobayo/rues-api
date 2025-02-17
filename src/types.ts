@@ -239,13 +239,13 @@ export type RuesFetchOptions = {
   method?: "GET" | "POST";
   path: string;
   searchParams?: URLSearchParams;
+  signal?: AbortSignal;
   token?: string;
 };
 
-export type RuesResponse<T> = Promise<
+export type RuesResponse<T> =
   | { data: T; status: "success"; statusCode: number }
-  | { error: unknown; status: "error"; statusCode?: number }
->;
+  | { error: unknown; status: "error"; statusCode?: number };
 
 export interface StoreFront {
   afiliado?: string;

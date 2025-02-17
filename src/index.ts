@@ -23,17 +23,20 @@ const baseUrl = "https://ruesapi.rues.org.co";
 
 export function advancedSearch({
   query,
+  signal,
   token,
 }: {
   query:
     | { cod_camara?: string; matricula: string }
     | { cod_camara?: string; nit: number }
     | { cod_camara?: string; razon: string };
+  signal?: AbortSignal;
   token: string;
 }) {
   return ruesApi<AdvancedSearchResponse>({
     body: query,
     path: "/api/ConsultasRUES/BusquedaAvanzadaRM",
+    signal,
     token,
   });
 }
@@ -51,9 +54,11 @@ export function getBusinessDetails(businessRegistrationId: string) {
 
 export function getBusinessEstablishments({
   query,
+  signal,
   token,
 }: {
   query: { businessRegistrationNumber: string; chamberCode: string };
+  signal?: AbortSignal;
   token: string;
 }) {
   return ruesApi<BusinessEstablishmentsResponse>({
@@ -62,22 +67,32 @@ export function getBusinessEstablishments({
       codigo_camara: query.chamberCode,
       matricula: query.businessRegistrationNumber,
     }),
+    signal,
     token,
   });
 }
 
-export async function getFile(registrationId: string) {
+export async function getFile({
+  registrationId,
+  signal,
+}: {
+  registrationId: string;
+  signal?: AbortSignal;
+}) {
   return ruesApi<FileResponse>({
     method: "GET",
     path: `/WEB2/api/Expediente/DetalleRM/${registrationId}`,
+    signal,
   });
 }
 
 export function getLegalRepresentativePowers({
   query,
+  signal,
   token,
 }: {
   query: { businessRegistrationNumber: string; chamberCode: string };
+  signal?: AbortSignal;
   token: string;
 }) {
   return ruesApi<string>({
@@ -86,14 +101,16 @@ export function getLegalRepresentativePowers({
       codigo_camara: query.chamberCode,
       matricula: query.businessRegistrationNumber,
     }),
+    signal,
     token,
   });
 }
 
-export async function getToken() {
+export async function getToken({ signal }: { signal?: AbortSignal } = {}) {
   try {
     const response = await ruesFetch({
       path: "/WEB2/api/Token/ObtenerToken",
+      signal,
     });
     const data = await response.json();
     const token = response.headers.get("tokenRuesAPI");
@@ -117,18 +134,27 @@ export async function getToken() {
   }
 }
 
-export async function queryNit({ nit, token }: { nit: number; token: string }) {
+export async function queryNit({
+  nit,
+  signal,
+  token,
+}: {
+  nit: number;
+  signal?: AbortSignal;
+  token: string;
+}) {
   return ruesApi<QueryNitResponse>({
     path: "/api/consultasRUES/ConsultaNIT",
     searchParams: new URLSearchParams({
       nit: String(nit),
       usuario: "",
     }),
+    signal,
     token,
   });
 }
 
-async function ruesApi<T>(options: RuesFetchOptions): RuesResponse<T> {
+async function ruesApi<T>(options: RuesFetchOptions): Promise<RuesResponse<T>> {
   try {
     const response = await ruesFetch(options);
     const data = (await response.json()) as
@@ -176,6 +202,7 @@ async function ruesFetch({
   method = "POST",
   path,
   searchParams,
+  signal,
   token,
 }: RuesFetchOptions) {
   const headers = new Headers();
@@ -191,5 +218,6 @@ async function ruesFetch({
     body: body ? JSON.stringify(body) : undefined,
     headers,
     method,
+    signal,
   });
 }
