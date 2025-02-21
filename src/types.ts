@@ -111,12 +111,7 @@ export interface CompanyRecord {
   fecha_matricula: string;
   fecha_renovacion: string;
   genero: string;
-  HistoricoCambiosNombre: {
-    codigo_camara: string;
-    fecha_cambio: string;
-    matricula: string;
-    razon_social_anterior: string;
-  };
+  HistoricoCambiosNombre: NameChange[];
   indicador_emprendimiento_social: string;
   indicador_inhabilidad_RUP: string;
   informacionCapitales?: CapitalInformation[];
@@ -225,6 +220,13 @@ export interface FinancialInformation {
   patrimonio_neto: string;
   resultado_del_periodo: string;
   utilidad_perdida_operacional: string;
+}
+
+export interface NameChange {
+  codigo_camara: string;
+  fecha_cambio: string;
+  matricula: string;
+  razon_social_anterior: string;
 }
 
 export interface Penalty {

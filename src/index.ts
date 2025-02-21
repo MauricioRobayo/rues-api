@@ -15,6 +15,7 @@ export type {
   CompanyRecord,
   File,
   FileResponse,
+  NameChange,
   StoreFront,
   TourismRegistry,
 } from "./types";
