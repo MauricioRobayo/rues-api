@@ -131,7 +131,7 @@ export interface CompanyRecord {
   objeto_social?: string;
   organizacion_juridica: string;
   razon_social: string;
-  sanciones: unknown[];
+  sanciones: Penalty[];
   sede_administrativa?: string;
   sigla?: string;
   telefono_comercial_1: string;
@@ -225,6 +225,40 @@ export interface FinancialInformation {
   patrimonio_neto: string;
   resultado_del_periodo: string;
   utilidad_perdida_operacional: string;
+}
+
+export interface Penalty {
+  cod_estado: string;
+  codigo_camara: string;
+  codigo_libro_registro: string;
+  condicion_incumplimiento: string;
+  descripcion_sancion: string;
+  dv_entidad: string;
+  dv_proponente: string;
+  estado: string;
+  fecha_acto_administrativo: string;
+  fecha_acto_confirmacion: string;
+  fecha_acto_revocacion: string;
+  fecha_acto_suspension: string;
+  fecha_ejecutoria: string;
+  fecha_inscripcion_camara: string;
+  fundamento_legal: string;
+  municipio_entidad: string;
+  nit_entidad: string;
+  nit_proponente: string;
+  nombre_entidad: string;
+  nombre_proponente: string;
+  numero_acto_administrativo: string;
+  numero_acto_confirmacion: string;
+  numero_acto_ejecutoria: string;
+  numero_acto_revocacion: string;
+  numero_acto_suspension: string;
+  numero_contrato: string;
+  numero_inscripcion_libro: string;
+  observaciones: string;
+  seccional_entidad: string;
+  tipo_reporte: string;
+  vigencia_sancion: string;
 }
 
 export interface QueryNitResponse {
