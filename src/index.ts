@@ -16,6 +16,7 @@ export type {
   File,
   FileResponse,
   NameChange,
+  Penalty,
   StoreFront,
   TourismRegistry,
 } from "./types";
