@@ -5,6 +5,8 @@ import {
   type StrictRequest,
 } from "msw";
 
+import { baseUrl } from "..";
+
 export const mockToken = "mock-token";
 export const mockFileId = "mock-file-id";
 export const mockResponse = { mock: true };
@@ -23,7 +25,7 @@ const unauthorized = () =>
   );
 
 export const handlers = [
-  http.post("https://ruesapi.rues.org.co/WEB2/api/Token/ObtenerToken", () => {
+  http.post(`${baseUrl}/WEB2/api/Token/ObtenerToken`, () => {
     return HttpResponse.json(mockResponse, {
       headers: {
         tokenRuesAPI: mockToken,
@@ -31,7 +33,7 @@ export const handlers = [
     });
   }),
   http.post(
-    "https://ruesapi.rues.org.co/api/ConsultasRUES/BusquedaAvanzadaRM",
+    `${baseUrl}/api/ConsultasRUES/BusquedaAvanzadaRM`,
     ({ request }) => {
       if (!validateRequest(request)) {
         return unauthorized();
@@ -39,19 +41,25 @@ export const handlers = [
       return HttpResponse.json(mockResponse);
     }
   ),
-  http.get(
-    "https://ruesapi.rues.org.co/WEB2/api/Expediente/DetalleRM/:id",
-    () => HttpResponse.json(mockResponse)
+  http.get(`${baseUrl}/WEB2/api/Expediente/DetalleRM/:id`, () =>
+    HttpResponse.json(mockResponse)
   ),
-  http.post(
-    "https://ruesapi.rues.org.co/api/PropietarioEstXCamaraYMatricula",
-    ({ request }) => {
-      if (!validateRequest(request)) {
-        return unauthorized();
-      }
-      return HttpResponse.json(mockResponse);
+  http.post(`${baseUrl}/api/PropietarioEstXCamaraYMatricula`, ({ request }) => {
+    if (!validateRequest(request)) {
+      return unauthorized();
     }
-  ),
+    return HttpResponse.json(mockResponse);
+  }),
+  http.post(`${baseUrl}/api/consultasRUES/ConsultaNIT`, async ({ request }) => {
+    console.log("msw", request);
+
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    if (!validateRequest(request)) {
+      return unauthorized();
+    }
+    return HttpResponse.json(mockResponse);
+  }),
 ];
 
 function validateRequest(request: StrictRequest<DefaultBodyType>) {

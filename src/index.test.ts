@@ -103,3 +103,25 @@ describe("getEstablishments", () => {
     });
   });
 });
+
+describe("queryNit", () => {
+  test("successful response", async () => {
+    const response = await RUES.queryNit({ nit: 123, token: mockToken });
+    expect(response).toMatchObject({
+      data: mockResponse,
+      status: "success",
+      statusCode: 200,
+    });
+  });
+  test("abort signal", async () => {
+    const signal = AbortSignal.timeout(0);
+    const response = await RUES.queryNit({
+      nit: 123,
+      signal,
+      token: mockToken,
+    });
+    expect(response).toMatchObject({
+      status: "error",
+    });
+  });
+});

@@ -21,7 +21,8 @@ export type {
   TourismRegistry,
 } from "./types";
 
-const baseUrl = process.env.RUES_API_BASE_URL ?? "https://ruesapi.rues.org.co";
+export const baseUrl =
+  process.env.RUES_API_BASE_URL ?? "https://ruesapi.rues.org.co";
 
 type WithOptions<T = unknown> = T & {
   signal?: AbortSignal;
