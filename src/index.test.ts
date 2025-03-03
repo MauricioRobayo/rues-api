@@ -62,7 +62,7 @@ describe("advancedSearch", () => {
 });
 
 test("getFile", async () => {
-  const response = await RUES.getFile(mockFileId);
+  const response = await RUES.getFile({ registrationId: mockFileId });
 
   expect(response).toMatchObject({
     data: mockResponse,
