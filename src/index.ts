@@ -137,6 +137,26 @@ export async function getToken({ signal }: WithOptions = {}) {
   }
 }
 
+export async function getTokenWithPassword({
+  password,
+  signal,
+  username,
+}: WithOptions<{ password: string; username: string }>) {
+  const headers = new Headers();
+  headers.append("Content-Type", "application/x-www-form-urlencoded");
+
+  const urlencoded = new URLSearchParams();
+  urlencoded.append("grant_type", "password");
+  urlencoded.append("username", username); //"FNAGARAN2"
+  urlencoded.append("password", password); // "zykqE6G*"
+  return ruesApi({
+    body: urlencoded.toString(),
+    headers,
+    path: "Token",
+    signal,
+  });
+}
+
 export async function queryNit({
   nit,
   signal,
@@ -201,24 +221,25 @@ async function ruesApi<T>(options: RuesFetchOptions): Promise<RuesResponse<T>> {
 
 async function ruesFetch({
   body,
+  headers,
   method = "POST",
   path,
   searchParams,
   signal,
   token,
 }: RuesFetchOptions) {
-  const headers = new Headers();
-  headers.append("Content-Type", "application/json");
+  const ruesHeaders = new Headers();
+  ruesHeaders.append("Content-Type", "application/json");
   if (token) {
-    headers.append("Authorization", `Bearer ${token}`);
+    ruesHeaders.append("Authorization", `Bearer ${token}`);
   }
   const url = new URL(path, baseUrl);
   if (searchParams) {
     url.search = searchParams.toString();
   }
   return fetch(url, {
-    body: body ? JSON.stringify(body) : undefined,
-    headers,
+    body: typeof body === "string" ? body : JSON.stringify(body),
+    headers: headers ?? ruesHeaders,
     method,
     signal,
   });

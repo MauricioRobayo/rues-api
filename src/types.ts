@@ -271,7 +271,8 @@ export interface QueryNitResponse {
 }
 
 export type RuesFetchOptions = {
-  body?: Record<string, unknown>;
+  body?: Record<string, unknown> | string;
+  headers?: Headers;
   method?: "GET" | "POST";
   path: string;
   searchParams?: URLSearchParams;
