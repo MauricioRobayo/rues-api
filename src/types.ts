@@ -283,7 +283,6 @@ export type RuesFetchOptions = {
 export type RuesResponse<T> =
   | { data: T; status: "success"; statusCode: number }
   | { error: unknown; status: "error"; statusCode?: number };
-
 export interface StoreFront {
   afiliado?: string;
   ano_renovado_anterior?: string;
@@ -330,6 +329,15 @@ export interface StoreFront {
   tipo_propietario?: string;
   ultimo_ano_renovado?: string;
   valor_est_ag_suc?: string;
+}
+
+export interface TokenResponse {
+  ".expires": string;
+  ".issued": string;
+  access_token: string;
+  expires_in: number;
+  token_type: string;
+  userName: string;
 }
 
 export interface TourismRegistry {

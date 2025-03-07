@@ -1,10 +1,11 @@
-import type {
-  AdvancedSearchResponse,
-  BusinessEstablishmentsResponse,
-  FileResponse,
-  QueryNitResponse,
-  RuesFetchOptions,
-  RuesResponse,
+import {
+  type AdvancedSearchResponse,
+  type BusinessEstablishmentsResponse,
+  type FileResponse,
+  type QueryNitResponse,
+  type RuesFetchOptions,
+  type RuesResponse,
+  TokenResponse,
 } from "./types";
 
 export type {
@@ -147,9 +148,9 @@ export async function getTokenWithPassword({
 
   const urlencoded = new URLSearchParams();
   urlencoded.append("grant_type", "password");
-  urlencoded.append("username", username); //"FNAGARAN2"
-  urlencoded.append("password", password); // "zykqE6G*"
-  return ruesApi({
+  urlencoded.append("username", username);
+  urlencoded.append("password", password);
+  return ruesApi<TokenResponse>({
     body: urlencoded.toString(),
     headers,
     path: "Token",
