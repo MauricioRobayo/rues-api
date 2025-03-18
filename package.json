@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "homepage": "https://www.registronit.com",
   "files": [
     "dist"
   ],
@@ -36,7 +37,6 @@
   "bugs": {
     "url": "https://github.com/MauricioRobayo/rues-api/issues"
   },
-  "homepage": "https://github.com/MauricioRobayo/rues-api#readme",
   "devDependencies": {
     "@eslint/js": "^9.17.0",
     "@types/async-retry": "^1.4.9",
